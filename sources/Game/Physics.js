@@ -18,7 +18,8 @@ export class Physics
     setExample()
     {
         // Create the ground
-        this.world.createCollider(RAPIER.ColliderDesc.cuboid(10.0, 0.1, 10.0));
+        const groundCollider = RAPIER.ColliderDesc.cuboid(10.0, 1, 10.0).setTranslation(0.0, - 1.01, 0.0)
+        this.world.createCollider(groundCollider)
 
         // // Create a dynamic rigid-body with collider
         // const rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()

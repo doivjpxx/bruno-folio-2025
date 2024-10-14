@@ -10,6 +10,7 @@ export class Rendering
         this.renderer = new THREE.WebGPURenderer()
         this.renderer.setSize(this.game.viewport.width, this.game.viewport.height)
         this.renderer.domElement.classList.add('experience')
+        this.renderer.setClearColor(0x1f1919)
         this.game.domElement.append(this.renderer.domElement)
 
         this.game.time.events.on('tick', () =>
