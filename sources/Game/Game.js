@@ -1,3 +1,4 @@
+import { Controls } from './Controls.js'
 import { Physics } from './Physics.js'
 import { PhysicsDebug } from './PhysicsDebug.js'
 import { Rendering } from './Rendering.js'
@@ -22,6 +23,7 @@ export class Game
 
         this.time = new Time()
         this.viewport = new Viewport(this.domElement)
+        this.controls = new Controls()
         this.physics = new Physics()
         this.world = new World()
         this.physicsDebug = new PhysicsDebug()

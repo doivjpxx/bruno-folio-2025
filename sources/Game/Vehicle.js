@@ -70,9 +70,15 @@ export class Vehicle
 
     update()
     {
-        this.controller.setWheelEngineForce(0, 1)
-        this.controller.setWheelEngineForce(1, 1)
-        this.controller.setWheelEngineForce(2, 1)
-        this.controller.setWheelEngineForce(3, 1)
+        let wheelEngineForce = 0
+        if(this.game.controls.keys.up)
+            wheelEngineForce = 1
+        if(this.game.controls.keys.down)
+            wheelEngineForce = -1
+
+        for(let i = 0; i < 4; i++)
+        {
+            this.controller.setWheelEngineForce(i, wheelEngineForce)
+        }
     }
 }
