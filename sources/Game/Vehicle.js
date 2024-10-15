@@ -62,7 +62,9 @@ export class Vehicle
             new THREE.Vector3(- wheelsSetting.offset.x, wheelsSetting.offset.y, - wheelsSetting.offset.z),
         ]
 
-        this.wheels = []
+        this.wheels = {}
+        this.wheels.items = []
+        this.wheels.visualSteering = 0
 
         for(let i = 0; i < 4; i++)
         {
@@ -99,7 +101,7 @@ export class Vehicle
             visual.rotation.reorder('YXZ')
             visual.position.copy(basePosition)
             this.chassis.visual.add(visual)
-            this.wheels.push({ visual, basePosition })
+            this.wheels.items.push({ visual, basePosition })
         }
     }
 
@@ -119,13 +121,15 @@ export class Vehicle
         this.controller.setWheelSteering(0, steering)
         this.controller.setWheelSteering(2, steering)
 
+        this.wheels.visualSteering += (steering - this.wheels.visualSteering) * this.game.time.delta * 16
+
         for(let i = 0; i < 4; i++)
         {
-            const wheel = this.wheels[i]
+            const wheel = this.wheels.items[i]
             this.controller.setWheelEngineForce(i, wheelEngineForce)
             this.controller.setWheelBrake(i, 0.04)
 
-            wheel.visual.rotation.y = this.controller.wheelSteering(i)
+            wheel.visual.rotation.y = this.wheels.visualSteering
             wheel.visual.position.y = wheel.basePosition.y - this.controller.wheelSuspensionLength(i)
 
             wheel.visual.rotation.x += wheelEngineForce * 0.01
