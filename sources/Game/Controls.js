@@ -14,6 +14,7 @@ export class Controls
             { name: 'jump', keys: [ 'Space' ] },
             { name: 'boost', keys: [ 'ShiftLeft', 'ShiftRight' ] },
             { name: 'brake', keys: [ 'KeyB' ] },
+            { name: 'reset', keys: [ 'KeyR' ] },
         ]
 
         this.keys = {}

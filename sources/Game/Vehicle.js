@@ -14,6 +14,7 @@ export class Vehicle
 
         this.setWheels()
         this.setJump()
+        this.setReset()
 
         this.game.time.events.on('tick', () =>
         {
@@ -48,9 +49,9 @@ export class Vehicle
     setWheels()
     {
         const wheelsSetting = {
-            offset: new THREE.Vector3(0.75, -0.4,  0.8), // No default
-            directionCs: new THREE.Vector3(0, -1, 0), // Suspension direction
-            axleCs: new THREE.Vector3(-1, 0, 0),      // Rotation axis
+            offset: { x: 0.75, y: -0.4, z: 0.8 }, // No default
+            directionCs: { x: 0, y: -1, z: 0 },   // Suspension direction
+            axleCs: { x: -1, y: 0, z: 0 },        // Rotation axis
             frictionSlip: 20,             // 10.5
             maxSuspensionForce: 6000,    // 6000
             maxSuspensionTravel: 5,      // 5
@@ -138,6 +139,24 @@ export class Vehicle
         {
             if(_down)
                 this.jump.activate()
+        })
+    }
+
+    setReset()
+    {
+        this.reset = {}
+        this.reset.activate = () =>
+        {
+            this.chassis.physical.body.setTranslation({ x: 2, y: 4, z: 2 })
+            this.chassis.physical.body.setRotation({ w: 1, x: 0, y: 0, z: 0 })
+            this.chassis.physical.body.setLinvel({ x: 0, y: 0, z: 0 })
+            this.chassis.physical.body.setAngvel({ x: 0, y: 0, z: 0 })
+        }
+
+        this.game.controls.events.on('reset', (_down) =>
+        {
+            if(_down)
+                this.reset.activate()
         })
     }
 
