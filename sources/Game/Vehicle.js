@@ -17,6 +17,8 @@ export class Vehicle
         this.velocity = new THREE.Vector3()
         this.speed = 0
         this.upsideDownRatio = 0
+        this.stopped = true
+        this.stoppedTime = 0
 
         this.setWheels()
         this.setJump()
@@ -125,7 +127,7 @@ export class Vehicle
     {
         this.jump = {}
         this.jump.force = 8
-        this.jump.activate = () =>
+        this.jump.jumpUp = () =>
         {
             if(this.wheels.inContact > 0)
             {
@@ -141,10 +143,19 @@ export class Vehicle
             }
         }
 
+        this.jump.recover = () =>
+        {
+                const impulse = new THREE.Vector3(0, 1, 0).multiplyScalar(this.jump.force * this.chassis.physical.body.mass())
+                this.chassis.physical.body.applyImpulse(impulse)
+
+                const torque = 4 * this.upsideDownRatio
+                this.chassis.physical.body.applyTorqueImpulse({ x: torque * 0.5, y: 0, z: torque })
+        }
+
         this.game.inputs.events.on('jump', (_down) =>
         {
             if(_down)
-                this.jump.activate()
+                this.jump.jumpUp()
         })
     }
 
@@ -211,7 +222,7 @@ export class Vehicle
         {
             const wheel = this.wheels.items[i]
 
-            wheel.visual.rotation.x += this.wheels.engineForce * 0.01
+            wheel.visual.rotation.x += this.wheels.engineForce * 1.5 * this.game.time.delta
             wheel.visual.rotation.y = this.wheels.visualSteering
 
             wheel.visual.position.y = wheel.basePosition.y - this.controller.wheelSuspensionLength(i)
@@ -228,5 +239,43 @@ export class Vehicle
         this.up.set(0, 1, 0).applyQuaternion(this.chassis.physical.body.rotation())
         this.speed = this.positionDelta.length() / this.game.time.delta // Units per seconds
         this.upsideDownRatio = this.up.dot(new THREE.Vector3(0, - 1, 0)) * 0.5 + 0.5
+
+        // Stopped
+        if(this.speed < 0.05)
+        {
+            if(!this.stopped)
+            {
+                this.stopped = true
+                this.stoppedTime = this.game.time.elapsed
+            }
+        }
+        if(this.speed > 0.1)
+        {
+            if(this.stopped)
+            {
+                this.stopped = false
+            }
+        }
+
+        // Stuck
+        if(
+            this.stopped &&
+            this.game.time.elapsed - this.stoppedTime > 1 &&
+            this.upsideDownRatio > 0.3
+        )
+        {
+            if(!this.stuck)
+            {
+                this.stuck = true
+                this.jump.recover()
+            }
+        }
+        else
+        {
+            if(this.stuck)
+            {
+                this.stuck = false
+            }
+        }
     }
 }

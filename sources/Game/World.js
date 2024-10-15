@@ -13,7 +13,7 @@ export class World
         this.scene.fogNode = rangeFog(color(0x1b191f), 50, 100)
 
         this.setGround()
-        this.setDummy()
+        // this.setDummy()
 
         // const axesHelper = new THREE.AxesHelper()
         // this.scene.add(axesHelper)
