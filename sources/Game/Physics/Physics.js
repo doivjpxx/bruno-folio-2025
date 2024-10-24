@@ -14,6 +14,15 @@ export class Physics
         {
             this.update()
         }, 2)
+
+        if(this.game.debug.active)
+        {
+            this.debugPanel = this.game.debug.panel.addFolder({
+                title: '⬇️ Physics',
+                expanded: true,
+            })
+            this.debugPanel.addBinding(this.world.gravity, 'y', { min: - 20, max: 20, step: 0.01 })
+        }
     }
 
     addEntity(_physicalDescription = null, _visual = null)
@@ -76,7 +85,7 @@ export class Physics
 
     update()
     {
-        this.world.timestep = this.game.time.delta * 2
+        this.world.timestep = this.game.time.deltaScaled
         this.world.step()
 
         this.world.vehicleControllers.forEach((_vehicleController) =>

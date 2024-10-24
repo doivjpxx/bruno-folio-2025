@@ -72,14 +72,14 @@ export class Vehicle
         this.wheels = {}
         this.wheels.items = []
         this.wheels.engineForce = 0
-        this.wheels.engineForceMax = 6
+        this.wheels.engineForceMax = 350
         this.wheels.engineBoostMultiplier = 2.5
         this.wheels.steering = 0
         this.wheels.steeringMax = 0.5
         this.wheels.visualSteering = 0
         this.wheels.inContact = 0
-        this.wheels.brakeStrength = 0.21
-        this.wheels.brakePerpetualStrength = 0.04
+        this.wheels.brakeStrength = 15
+        this.wheels.brakePerpetualStrength = 2.88
 
         // Create wheels
         for(let i = 0; i < 4; i++)
@@ -232,14 +232,12 @@ export class Vehicle
     {
         this.stop = {}
         this.stop.active = true
-        this.stop.time = 0
         this.stop.lowEdge = 0.04
         this.stop.highEdge = 0.7
         
         this.stop.activate = () =>
         {
             this.stop.active = true
-            this.stop.time = this.game.time.elapsed
             this.events.trigger('stop')
         }
         
@@ -345,8 +343,8 @@ export class Vehicle
 
         for(let i = 0; i < 4; i++)
         {
-            this.controller.setWheelBrake(i, brake)
-            this.controller.setWheelEngineForce(i, this.wheels.engineForce)
+            this.controller.setWheelBrake(i, brake * this.game.time.deltaScaled)
+            this.controller.setWheelEngineForce(i, this.wheels.engineForce * this.game.time.deltaScaled)
         }
     }
 
@@ -358,11 +356,11 @@ export class Vehicle
         this.position.copy(newPosition)
 
         this.up.set(0, 1, 0).applyQuaternion(this.chassis.physical.body.rotation())
-        this.speed = this.positionDelta.length() / this.game.time.delta // Units per seconds
+        this.speed = this.positionDelta.length() / this.game.time.deltaScaled // Units per seconds
         this.upsideDownRatio = this.up.dot(new THREE.Vector3(0, - 1, 0)) * 0.5 + 0.5
-
+        
         // Wheels
-        this.wheels.visualSteering += (this.wheels.steering - this.wheels.visualSteering) * this.game.time.delta * 16
+        this.wheels.visualSteering += (this.wheels.steering - this.wheels.visualSteering) * this.game.time.deltaScaled * 16
 
         this.wheels.inContact = 0
 
@@ -370,7 +368,7 @@ export class Vehicle
         {
             const wheel = this.wheels.items[i]
 
-            wheel.visual.rotation.x += this.wheels.engineForce * 1.5 * this.game.time.delta
+            wheel.visual.rotation.x += this.wheels.engineForce * 1.5 * this.game.time.deltaScaled
 
             if(i === 0 || i === 2)
                 wheel.visual.rotation.y = this.wheels.visualSteering

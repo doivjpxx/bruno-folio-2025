@@ -26,6 +26,7 @@ export class PhysicsDebug
             this.update()
         }, 3)
     }
+    
     update()
     {
         const { vertices, colors } = this.game.physics.world.debugRender()
