@@ -1,4 +1,5 @@
 import { Game } from '../Game.js'
+import RAPIER from '@dimforge/rapier3d-compat'
 
 export class Physics
 {

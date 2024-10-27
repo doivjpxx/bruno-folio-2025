@@ -8,17 +8,27 @@ import { Vehicle } from './Vehicle.js'
 import { View } from './View.js'
 import { Viewport } from './Viewport.js'
 import { World } from './World.js'
+import RAPIER from '@dimforge/rapier3d-compat'
 
 export class Game
 {
     constructor()
     {
         // Singleton
-        if(Game._instance)
-            return Game._instance
+        if(Game.instance)
+            return Game.instance
 
-        Game._instance = this
+        Game.instance = this
 
+        // Rapier init
+        RAPIER.init().then(() =>
+        {
+            this.init()
+        })
+    }
+
+    init()
+    {
         // Setup
         this.domElement = document.querySelector('.game')
 
