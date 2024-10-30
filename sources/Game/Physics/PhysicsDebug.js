@@ -14,10 +14,10 @@ export class PhysicsDebug
 
         this.material = new THREE.LineBasicNodeMaterial({ vertexColors: true })
 
-        this.mesh = new THREE.LineSegments(this.geometry, this.material)
+        this.lineSegments = new THREE.LineSegments(this.geometry, this.material)
 
         if(this.active)
-            this.game.world.scene.add(this.mesh)
+            this.game.world.scene.add(this.lineSegments)
 
         this.game.time.events.on('tick', () =>
         {
@@ -29,9 +29,9 @@ export class PhysicsDebug
             this.game.physics.debugPanel.addBinding(this, 'active', { label: 'debug' }).on('change', () =>
             {
                 if(this.active)
-                    this.game.world.scene.add(this.mesh)
+                    this.game.world.scene.add(this.lineSegments)
                 else
-                    this.game.world.scene.remove(this.mesh)
+                    this.game.world.scene.remove(this.lineSegments)
             })
         }
     }
