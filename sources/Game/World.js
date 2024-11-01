@@ -2,6 +2,9 @@ import * as THREE from 'three/webgpu'
 import { uniform, color, rangeFog } from 'three/webgpu'
 import { Game } from './Game.js'
 import MeshGridMaterial, { MeshGridMaterialLine } from './Materials/MeshGridMaterial.js'
+import { Terrain } from './Terrain.js'
+import { Bush } from './Bush.js'
+import { Lighting } from './Ligthing.js'
 
 export class World
 {
@@ -12,6 +15,7 @@ export class World
         this.scene = new THREE.Scene()
         this.scene.fogNode = rangeFog(color(0x1b191f), 20, 100)
 
+        this.bush = new Bush()
         this.setGround()
         // this.setTestCube()
 
@@ -23,13 +27,6 @@ export class World
         {
             this.update()
         }, 4)
-
-        // this.game.physics.addEntity(
-        //     {
-        //         type: 'fixed',
-        //         colliders: [ { shape: 'cuboid', parameters: [ 1, 1, 1 ] } ]
-        //     }
-        // )
     }
 
     setGround()
