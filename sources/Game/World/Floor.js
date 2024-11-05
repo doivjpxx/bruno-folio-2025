@@ -2,13 +2,13 @@ import * as THREE from 'three'
 import { Game } from '../Game.js'
 import MeshGridMaterial, { MeshGridMaterialLine } from '../Materials/MeshGridMaterial.js'
 
-export class GridFloor
+export class Floor
 {
     constructor()
     {
         this.game = new Game()
 
-        this.setVisual()
+        // this.setVisual()
         this.setPhysical()
     }
 

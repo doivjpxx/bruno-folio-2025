@@ -39,13 +39,13 @@ export class WheelTracks
         // )
         // this.scene.add(this.dummy)
 
-        this.debugPlaneCurrent = new THREE.Mesh(
-            new THREE.PlaneGeometry(5, 5),
-            new THREE.MeshBasicMaterial({ map: this.renderTarget.texture, transparent: false })
-        )
-        this.debugPlaneCurrent.position.y = 5
-        this.debugPlaneCurrent.position.x = - 3
-        this.game.scene.add(this.debugPlaneCurrent)
+        // this.debugPlaneCurrent = new THREE.Mesh(
+        //     new THREE.PlaneGeometry(5, 5),
+        //     new THREE.MeshBasicMaterial({ map: this.renderTarget.texture, transparent: false })
+        // )
+        // this.debugPlaneCurrent.position.y = 5
+        // this.debugPlaneCurrent.position.x = - 3
+        // this.game.scene.add(this.debugPlaneCurrent)
     }
 
     createTrack()

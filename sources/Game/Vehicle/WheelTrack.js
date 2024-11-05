@@ -9,8 +9,12 @@ export class WheelTrack
         this.game = new Game()
 
         this.subdivisions = 128
-        this.timeSpan = 1 / 30
+
+        this.timeThrottle = 1 / 30
         this.lastTime = 0
+
+        this.positionThrottle = 0.1
+        this.lastPosition = new THREE.Vector3(Infinity, Infinity, Infinity)
         
         this.setDataTexture()
         this.setTrail()
@@ -114,28 +118,36 @@ export class WheelTrack
     {
         const data = this.dataTexture.source.data.data
 
-        // Throttle update
+        // Throttle by time
         const lastTimeDelta = this.game.time.elapsed - this.lastTime
-        if(lastTimeDelta > this.timeSpan)
+        if(lastTimeDelta > this.timeThrottle)
         {
-            // Move data one "pixel"
-            for(let i = this.subdivisions - 1; i >= 0; i--)
+            // Throttle by distance
+            const positionDelta = this.lastPosition.clone().sub(_position)
+            const distance = positionDelta.length()
+            
+            if(distance > this.positionThrottle)
             {
-                const i4 = i * 4
-                data[i4    ] = data[i4 - 4]
-                data[i4 + 1] = data[i4 - 3]
-                data[i4 + 2] = data[i4 - 2]
-                data[i4 + 3] = data[i4 - 1]
+                // Move data one "pixel"
+                for(let i = this.subdivisions - 1; i >= 0; i--)
+                {
+                    const i4 = i * 4
+                    data[i4    ] = data[i4 - 4]
+                    data[i4 + 1] = data[i4 - 3]
+                    data[i4 + 2] = data[i4 - 2]
+                    data[i4 + 3] = data[i4 - 1]
+                }
+
+                // Draw new position
+                data[0] = _position.x
+                data[1] = _position.y
+                data[2] = _position.z
+                data[3] = _touching ? 1 : 0
+
+                // Save time and position
+                this.lastTime = this.game.time.elapsed
+                this.lastPosition.copy(_position)
             }
-
-            // Draw new position
-            data[0] = _position.x
-            data[1] = _position.y
-            data[2] = _position.z
-            data[3] = _touching ? 1 : 0
-
-            // Save time
-            this.lastTime = this.game.time.elapsed
         }
 
         this.dataTexture.needsUpdate = true

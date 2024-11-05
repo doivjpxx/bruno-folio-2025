@@ -3,7 +3,7 @@ import { Game } from '../Game.js'
 
 import { Terrain } from './Terrain.js'
 import { Bush } from './Bush.js'
-import { GridFloor } from './GridFloor.js'
+import { Floor } from './Floor.js'
 import { Grass } from './Grass.js'
 
 export class World
@@ -12,7 +12,7 @@ export class World
     {
         this.game = new Game()
 
-        this.gridFloor = new GridFloor()
+        this.floor = new Floor()
         // this.bush = new Bush()
         this.grass = new Grass()
         // this.setTestCube()
@@ -20,7 +20,6 @@ export class World
         // const axesHelper = new THREE.AxesHelper()
         // axesHelper.position.y = 2
         // this.game.scene.add(axesHelper)
-
     }
 
     setTestCube()
