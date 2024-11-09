@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import CameraControls from 'camera-controls'
 import { Game } from './Game.js'
 import { clamp, lerp, remap, smoothstep } from './utilities/maths.js'
-import { atan2, cos, sin, uniform, PI, vec3, time, modelViewMatrix, cameraProjectionMatrix, viewport, vec4, Fn, positionGeometry, positionLocal, attribute } from 'three'
+import { mix, vec2, atan2, cos, sin, uniform, PI, vec3, time, modelViewMatrix, cameraProjectionMatrix, viewport, vec4, Fn, positionGeometry, positionLocal, attribute } from 'three'
 
 CameraControls.install( { THREE: THREE } )
 
@@ -149,72 +149,86 @@ export class View
     setSpeedLines()
     {
         this.speedLines = {}
-        this.speedLines.smoothedStrength = uniform(0)
         this.speedLines.strength = 0
+        this.speedLines.smoothedStrength = uniform(this.speedLines.strength)
+        this.speedLines.worldTarget = new THREE.Vector3()
+        this.speedLines.clipSpaceTarget = uniform(new THREE.Vector3())
         this.speedLines.speed = uniform(25)
 
         const linesCount = 30
         const positionArray = new Float32Array(linesCount * 3 * 3)
-        const indexArray = new Float32Array(linesCount * 3)
+        const timeRandomnessArray = new Float32Array(linesCount * 3)
+        const distanceArray = new Float32Array(linesCount * 3)
+        const tipnessArray = new Float32Array(linesCount * 3)
         const maxDistance = Math.hypot(1, 1)
 
         for(let i = 0; i < linesCount; i++)
         {
+            const i9 = i * 9
+            const i3 = i * 3
+
             // Base vertex
-            const base = new THREE.Vector2(0, 1)
+            const vertexMiddle = new THREE.Vector2(0, 1)
             const angle = Math.PI * 2 * Math.random()
-            base.rotateAround(new THREE.Vector2(), angle)
+            vertexMiddle.rotateAround(new THREE.Vector2(), angle)
 
             // Side vertices 
-            const thickness = Math.random() * 0.05 + 0.003
-            const sideA = base.clone().rotateAround(new THREE.Vector2(), thickness)
-            const sideB = base.clone().rotateAround(new THREE.Vector2(), - thickness)
+            const thickness = Math.random() * 0.01 + 0.002
+            const vertexLeft = vertexMiddle.clone().rotateAround(new THREE.Vector2(), thickness)
+            const vertexRight = vertexMiddle.clone().rotateAround(new THREE.Vector2(), - thickness)
             
             // Distance to center
-            sideA.multiplyScalar(maxDistance)
-            sideB.multiplyScalar(maxDistance)
-            base.multiplyScalar(maxDistance * Math.random() * 0.5)
+            vertexMiddle.multiplyScalar(maxDistance)
+            vertexLeft.multiplyScalar(maxDistance)
+            vertexRight.multiplyScalar(maxDistance)
 
-            // Save in position array
-            const i9 = i * 9
-
-            positionArray[i9 + 0] = sideA.x
-            positionArray[i9 + 1] = sideA.y
+            // Position
+            positionArray[i9 + 0] = vertexLeft.x
+            positionArray[i9 + 1] = vertexLeft.y
             positionArray[i9 + 2] = 0
             
-            positionArray[i9 + 3] = base.x
-            positionArray[i9 + 4] = base.y
+            positionArray[i9 + 3] = vertexMiddle.x
+            positionArray[i9 + 4] = vertexMiddle.y
             positionArray[i9 + 5] = 0
 
-            positionArray[i9 + 6] = sideB.x
-            positionArray[i9 + 7] = sideB.y
+            positionArray[i9 + 6] = vertexRight.x
+            positionArray[i9 + 7] = vertexRight.y
             positionArray[i9 + 8] = 0
 
-            // Save index
-            const i3 = i * 3
-            indexArray[i3 + 0] = i
-            indexArray[i3 + 1] = i
-            indexArray[i3 + 2] = i
+            // Time randomness
+            timeRandomnessArray[i3 + 0] = i
+            timeRandomnessArray[i3 + 1] = i
+            timeRandomnessArray[i3 + 2] = i
+
+            // Distance
+            const distance = Math.random() * 0.4 + 0.4
+            distanceArray[i3 + 0] = distance
+            distanceArray[i3 + 1] = distance
+            distanceArray[i3 + 2] = distance
+
+            // Tipness
+            tipnessArray[i3 + 0] = 0
+            tipnessArray[i3 + 1] = 1
+            tipnessArray[i3 + 2] = 0
         }
 
         this.speedLines.geometry = new THREE.BufferGeometry()
         this.speedLines.geometry.setAttribute('position', new THREE.Float32BufferAttribute(positionArray, 3))
-        this.speedLines.geometry.setAttribute('index', new THREE.Float32BufferAttribute(indexArray, 1))
+        this.speedLines.geometry.setAttribute('timeRandomness', new THREE.Float32BufferAttribute(timeRandomnessArray, 1))
+        this.speedLines.geometry.setAttribute('distance', new THREE.Float32BufferAttribute(distanceArray, 1))
+        this.speedLines.geometry.setAttribute('tipness', new THREE.Float32BufferAttribute(tipnessArray, 1))
 
         this.speedLines.material = new THREE.MeshBasicNodeMaterial({ wireframe: false, depthWrite: false, depthTest: false })
         this.speedLines.material.vertexNode = Fn(() =>
         {
-            const lineIndex = attribute('index')
-            const lineRatio = time.mul(this.speedLines.speed).add(lineIndex).sin().div(2).add(0.5)
-
-            const newPosition = positionGeometry.toVar()
-            const length = newPosition.xy.length()
-            const angle = atan2(newPosition.y, newPosition.x)
-            length.addAssign(lineRatio.add(this.speedLines.smoothedStrength.oneMinus().mul(maxDistance)))
-            newPosition.x.assign(cos(angle).mul(length))
-            newPosition.y.assign(sin(angle).mul(length))
+            const timeRandomness = attribute('timeRandomness')
+            const distance = attribute('distance')
+            const tipness = attribute('tipness')
             
-            return vec4(newPosition, 1)
+            const osciliation = time.mul(this.speedLines.speed).add(timeRandomness).sin().div(2).add(0.5)
+            const newPosition = mix(positionGeometry.xy, this.speedLines.clipSpaceTarget.xy, tipness.mul(osciliation).mul(distance).mul(this.speedLines.smoothedStrength))
+            
+            return vec4(newPosition, 0, 1)
         })()
         this.speedLines.material.outputNode = vec4(1)
 
@@ -304,6 +318,9 @@ export class View
         }
 
         // Speed lines
+        this.speedLines.clipSpaceTarget.value.copy(this.speedLines.worldTarget)
+        this.speedLines.clipSpaceTarget.value.project(this.camera)
+
         this.speedLines.smoothedStrength.value = lerp(this.speedLines.smoothedStrength.value, this.speedLines.strength, this.game.time.delta * 2)
     }
 }

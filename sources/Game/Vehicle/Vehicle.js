@@ -487,9 +487,11 @@ export class Vehicle
         this.game.view.focusPoint.trackedPosition.copy(this.position)
 
         if(this.game.inputs.keys.boost && (this.game.inputs.keys.forward || this.game.inputs.keys.backward) && this.absoluteSpeed > 5)
-            this.game.view.speedLines.strength = 0.8
+            this.game.view.speedLines.strength = 1
         else
             this.game.view.speedLines.strength = 0
+
+        this.game.view.speedLines.worldTarget.copy(this.position)
 
         // Ground data focus point
         this.game.groundData.focusPoint.set(this.game.vehicle.position.x, this.game.vehicle.position.z)
