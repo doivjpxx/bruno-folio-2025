@@ -65,15 +65,15 @@ export class Track
             )
 
             const sideSign = sign(positionGeometry.y).mul(-1)
-            const testPosition = vec2(
+            const trailPosition = vec2(
                 cos(angle.add(sideSign.mul(Math.PI * 0.5))),
                 sin(angle.add(sideSign.mul(Math.PI * 0.5)))
             ).mul(0.35)
             
             const newPosition = vec3(
-                trackData.x.add(testPosition.x),
+                trackData.x.add(trailPosition.x),
                 trackData.y,
-                trackData.z.add(testPosition.y)
+                trackData.z.add(trailPosition.y)
             )
 
             return newPosition
