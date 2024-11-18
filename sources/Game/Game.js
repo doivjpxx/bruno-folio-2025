@@ -67,10 +67,12 @@ export class Game
         this.groundData = new GroundData()
         this.view = new View()
         this.vehicle = new Vehicle()
-        this.world = new World()
         this.lighting = new Lighting()
+        this.world = new World()
         this.rendering = new Rendering()
-        // this.monitoring = new Monitoring()
+        this.monitoring = new Monitoring()
+
+        this.rendering.renderer.setAnimationLoop((elapsedTime) => { this.time.update(elapsedTime) })
     }
 }
 

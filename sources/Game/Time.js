@@ -15,9 +15,8 @@ export class Time
         this.elapsedScaled = 0
 
         this.events = new Events()
-        this.setTick()
+        // this.setTick()
 
-        console.log(this.game.debug)
         if(this.game.debug.active)
         {
             this.debugPanel = this.game.debug.panel.addFolder({
@@ -32,16 +31,21 @@ export class Time
     {
         const tick = (elapsed) =>
         {
-            const elapsedSeconds = elapsed / 1000
-            this.delta = Math.min(elapsedSeconds - this.elapsed, this.maxDelta)
-            this.elapsed = elapsedSeconds
-            this.deltaScaled = this.delta * this.scale
-            this.elapsedScaled += this.deltaScaled
-
-            this.events.trigger('tick')
+            this.update(elapsed)
 
             requestAnimationFrame(tick)
         }
         requestAnimationFrame(tick)
+    }
+
+    update(elapsed)
+    {
+        const elapsedSeconds = elapsed / 1000
+        this.delta = Math.min(elapsedSeconds - this.elapsed, this.maxDelta)
+        this.elapsed = elapsedSeconds
+        this.deltaScaled = this.delta * this.scale
+        this.elapsedScaled += this.deltaScaled
+
+        this.events.trigger('tick')
     }
 }

@@ -15,6 +15,7 @@ export class Monitoring
         this.stats = new Stats({
             trackGPU: true,
             trackHz: false,
+            trackCPT: false,
             logsPerSecond: 4,
             graphsPerSecond: 30,
             samplesLog: 40, 
