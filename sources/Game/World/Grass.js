@@ -14,24 +14,6 @@ export class Grass
         this.count = this.subdivisions * this.subdivisions
         this.fragmentSize = this.size / this.subdivisions
 
-        this.game.resources.load(
-            [
-                { path: 'matcaps/grassOnGreen.png', type: 'texture', name: 'matcapGrassOnGreen' },
-                { path: 'noises-256x256.png', type: 'texture', name: 'noisesTexture' },
-            ],
-            (resources) =>
-            {
-                this.resources = resources
-                this.resources.matcapGrassOnGreen.colorSpace = THREE.SRGBColorSpace
-                this.resources.noisesTexture.wrapS = THREE.RepeatWrapping
-                this.resources.noisesTexture.wrapT = THREE.RepeatWrapping
-                this.init()
-            }
-        )
-    }
-
-    init()
-    {
         this.setGeometry()
         this.setMaterial()
         this.setMesh()
@@ -136,7 +118,7 @@ export class Grass
             const wheelsTracksHeight = groundDataColor.a.oneMinus().toVar()
 
             // Height
-            const heightVariation = texture(this.resources.noisesTexture, bladePosition.mul(0.0321)).add(0.5)
+            const heightVariation = texture(this.game.resources.noisesTexture, bladePosition.mul(0.0321)).add(0.5)
             const height = bladeHeight
                 .mul(bladeHeightRandomness.mul(attribute('heightRandomness')).add(bladeHeightRandomness.oneMinus()))
                 .mul(heightVariation.r)
@@ -157,7 +139,7 @@ export class Grass
             vertexPosition.xz.assign(rotateUV(vertexPosition.xz, angleToCamera, worldPosition.xz))
 
             // Wind
-            wind.assign(getWind([this.resources.noisesTexture, worldPosition.xz]).mul(tipness).mul(height).mul(2))
+            wind.assign(getWind([this.game.resources.noisesTexture, worldPosition.xz]).mul(tipness).mul(height).mul(2))
             vertexPosition.addAssign(vec3(wind.x, 0, wind.y))
 
             return vertexPosition
@@ -179,7 +161,7 @@ export class Grass
         // Output
         const colorA = uniform(color('#72a51e'))
         const colorB = uniform(color('#e0e239'))
-        const colorVariation = varying(texture(this.resources.noisesTexture, bladePosition.mul(0.02)).smoothstep(0.2, 0.8))
+        const colorVariation = varying(texture(this.game.resources.noisesTexture, bladePosition.mul(0.02)).smoothstep(0.2, 0.8))
 
         const baseColor = colorVariation.mix(colorA, colorB).rgb.varying()
         const shadowColor = baseColor.mul(vec3(0.25, 0.5, 3, 1)).rgb.varying()

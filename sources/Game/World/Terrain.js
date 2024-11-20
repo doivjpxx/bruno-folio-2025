@@ -14,25 +14,9 @@ export class Terrain
         this.game = new Game()
 
         this.group = new THREE.Group()
-        this.game.resources.load(
-            [
-                { path: './terrain/terrainData.png', type: 'texture', name: 'terrainDataTexture' },
-                { path: './perlin.png', type: 'texture', name: 'perlinTexture' }
-            ],
-            (resources) =>
-            {
-                this.resources = resources
 
-                this.resources.terrainDataTexture.wrapS = THREE.RepeatWrapping
-                this.resources.terrainDataTexture.wrapT = THREE.RepeatWrapping
-
-                this.resources.perlinTexture.wrapS = THREE.RepeatWrapping
-                this.resources.perlinTexture.wrapT = THREE.RepeatWrapping
-
-                this.setPhysics()
-                this.setFloor()
-            }
-        )
+        this.setPhysics()
+        this.setFloor()
     }
 
     setPhysics()
@@ -53,10 +37,10 @@ export class Terrain
         const grassColor = uniform(color('#928a20'))
         const dirtColor = uniform(color('#ffbb52'))
 
-        const noise1 = texture(this.resources.perlinTexture, uv().mul(3)).x
-        const noise2 = texture(this.resources.perlinTexture, uv().mul(1)).y
+        const noise1 = texture(this.game.resources.perlinTexture, uv().mul(3)).x
+        const noise2 = texture(this.game.resources.perlinTexture, uv().mul(1)).y
         const noise = noise1.add(noise2).div(2)
-        const terrainData = texture(this.resources.terrainDataTexture)
+        const terrainData = texture(this.game.resources.terrainDataTexture)
         
         const noiseVariation = noise.sub(0.5).mul(2)
         const factor = terrainData.r.add(noiseVariation).clamp(0, 1)

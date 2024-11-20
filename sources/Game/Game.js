@@ -5,7 +5,7 @@ import { Debug } from './Debug.js'
 import { Inputs } from './Inputs.js'
 import { Physics } from './Physics/Physics.js'
 import { Rendering } from './Rendering.js'
-import { Resources } from './Resources.js'
+import { ResourcesLoader } from './ResourcesLoader.js'
 import { Time } from './Time.js'
 import { Vehicle } from './Vehicle.js'
 import { View } from './View.js'
@@ -28,8 +28,25 @@ export class Game
         // Rapier init
         RAPIER.init().then(() =>
         {
-            console.log('init')
-            this.init()
+            // Load resources
+            this.resources = new ResourcesLoader()
+            this.resources.load(
+                [
+                    { path: 'matcaps/grassOnGreen.png', type: 'texture', name: 'matcapGrassOnGreen' },
+                    { path: 'bush/bush-leaves-3.png', type: 'texture', name: 'bushLeaves' },
+                    { path: 'noises-256x256.png', type: 'texture', name: 'noisesTexture' },
+                ],
+                (resources) =>
+                {
+                    this.resources = resources
+                    this.resources.matcapGrassOnGreen.colorSpace = THREE.SRGBColorSpace
+                    this.resources.noisesTexture.wrapS = THREE.RepeatWrapping
+                    this.resources.noisesTexture.wrapT = THREE.RepeatWrapping
+
+                    // Init
+                    this.init()
+                }
+            )
         })
     }
 
@@ -62,7 +79,6 @@ export class Game
             { name: 'hydraulicsBackLeft', keys: [ 'Numpad1' ] },
         ])
         this.viewport = new Viewport(this.domElement)
-        this.resources = new Resources()
         this.physics = new Physics()
         this.groundData = new GroundData()
         this.view = new View()

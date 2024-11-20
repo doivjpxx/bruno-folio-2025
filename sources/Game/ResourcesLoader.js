@@ -1,7 +1,7 @@
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import * as THREE from 'three'
 
-export class Resources
+export class ResourcesLoader
 {
     constructor()
     {

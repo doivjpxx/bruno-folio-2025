@@ -13,59 +13,13 @@ export class Bushes
 
         this.items = _items
 
-        this.game.resources.load(
-            [
-                { path: 'bush/bush-leaves-3.png', type: 'texture', name: 'bushLeaves' },
-                { path: 'noises-256x256.png', type: 'texture', name: 'noisesTexture' },
-            ],
-            (resources) =>
-            {
-                this.resources = resources
-                this.init()
-            }
-        )
-
-        // const test = new THREE.Mesh(
-        //     new THREE.SphereGeometry(1, 32, 32),
-        //     new THREE.MeshLambertNodeMaterial()
-        // )
-        // test.castShadow = true
-        // test.receiveShadow = true
-        // test.position.y = 2
-        // test.position.z = 5
-        // this.game.scene.add(test)
-
-        // test.material.shadowPositionNode = Fn( () =>
-        // {
-        //     const pos = positionWorld.toVar()
-        //     pos.z.addAssign(2)
-        //     return pos
-        // })()
-
-        // const plane = new THREE.Mesh(
-        //     new THREE.PlaneGeometry(20, 20),
-        //     new THREE.MeshLambertNodeMaterial()
-        // )
-        // // plane.castShadow = true
-        // plane.receiveShadow = true
-        // plane.position.y = 0.6
-        // plane.position.z = 5
-        // plane.rotation.x = - Math.PI * 0.5
-        // this.game.scene.add(plane)
-
-        // plane.material.shadowPositionNode = Fn( () =>
-        // {
-        //     const pos = positionWorld.toVar()
-        //     pos.z.addAssign(2)
-        //     return pos
-        // })()
+        this.setGeometry()
+        this.setMaterial()
+        this.setInstancedMesh()
     }
 
     init()
     {
-        this.setGeometry()
-        this.setMaterial()
-        this.setInstancedMesh()
     }
 
     setGeometry()
@@ -126,12 +80,12 @@ export class Bushes
     setMaterial()
     {
         this.material = new THREE.MeshLambertNodeMaterial({
-            alphaMap: this.resources.bushLeaves,
+            alphaMap: this.game.resources.bushLeaves,
             alphaTest: 0.01
         })
     
         // Position
-        const wind = getWind([this.resources.noisesTexture, positionLocal.xz])
+        const wind = getWind([this.game.resources.noisesTexture, positionLocal.xz])
         const multiplier = positionLocal.y.clamp(0, 1).mul(1)
 
         const normalTest = vec3().toVar()
