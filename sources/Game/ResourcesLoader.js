@@ -65,7 +65,7 @@ export class ResourcesLoader
                     _file.path,
                     resource => { success(_file, resource) },
                     undefined,
-                    resource => { error(_file, resource) },
+                    // resource => { error(_file, resource) },
                 )
             }
         }

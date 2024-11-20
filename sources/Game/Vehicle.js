@@ -51,11 +51,18 @@ export class Vehicle
 
     setChassis()
     {
-        const visual = new THREE.Mesh(
-            new THREE.BoxGeometry(1.5 * 2, 0.5 * 2, 1 * 2),
-            new THREE.MeshNormalNodeMaterial({ wireframe: true })
-        )
-        this.game.scene.add(visual)
+        const model = this.game.resources.vehicleChassis.scene.children[0]
+        model.traverse((child) =>
+        {
+            if(child.isMesh)
+            {
+                child.receiveShadow = true
+                child.castShadow = true
+                child.material.shadowSide = THREE.BackSide
+            }
+        })
+        this.game.scene.add(model)
+
         this.chassis = this.game.physics.addEntity(
             {
                 type: 'dynamic',
@@ -64,9 +71,8 @@ export class Vehicle
                 colliders: [ { shape: 'cuboid', parameters: [ 1.5, 0.5, 1 ] } ],
                 canSleep: false,
             },
-            visual
+            model
         )
-        // this.chassis.physical.body.applyTorqueImpulse({ x: 0, y: 5, z: 0 })
     }
 
     setWheels()
@@ -85,6 +91,16 @@ export class Vehicle
         this.wheels.brakePerpetualStrength = 3
         this.wheels.maxSpeed = 5
         this.wheels.maxSpeedBoost = 12
+        this.wheels.model = this.game.resources.vehicleWheel.scene.children[0]
+        this.wheels.model.traverse((child) =>
+        {
+            if(child.isMesh)
+            {
+                child.receiveShadow = true
+                child.castShadow = true
+                child.material.shadowSide = THREE.BackSide
+            }
+        })
 
         // Geometry
         const wheelGeometry = new THREE.CylinderGeometry(1, 1, 0.5, 8)
@@ -99,13 +115,15 @@ export class Vehicle
             this.controller.addWheel(new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), 1, 1)
 
             // Visual
-            wheel.visual = new THREE.Mesh(
-                wheelGeometry,
-                new THREE.MeshNormalNodeMaterial({ flatShading: true })
-            )
-            wheel.visual.castShadow = true
-            wheel.visual.rotation.reorder('YXZ')
+            wheel.visual = new THREE.Group()
             this.chassis.visual.add(wheel.visual)
+
+            const actualWheel = this.wheels.model.clone(true)
+            wheel.visual.add(actualWheel)
+            actualWheel.position.set(0, 0, 0)
+            
+            if(i === 0 || i === 2)
+                actualWheel.rotation.y = Math.PI
 
             // Add track to ground data
             wheel.track = this.game.groundData.createTrack()
@@ -118,7 +136,10 @@ export class Vehicle
 
         // Settings
         this.wheels.settings = {
-            offset: { x: 0.8, y: -0.4, z: 0.85 }, // No default
+            offsetXFront: 0.78,
+            offsetXBack: -1,
+            offsetY: -0.5,
+            offsetZ: 0.75,
             radius: 0.5,                          // No default
             directionCs: { x: 0, y: -1, z: 0 },   // Suspension direction
             axleCs: { x: 0, y: 0, z: 1 },         // Rotation axis
@@ -136,10 +157,10 @@ export class Vehicle
             this.wheels.perimeter = this.wheels.settings.radius * Math.PI * 2
 
             const wheelsPositions = [
-                new THREE.Vector3(  this.wheels.settings.offset.x, this.wheels.settings.offset.y,   this.wheels.settings.offset.z),
-                new THREE.Vector3(  this.wheels.settings.offset.x, this.wheels.settings.offset.y, - this.wheels.settings.offset.z),
-                new THREE.Vector3(- this.wheels.settings.offset.x, this.wheels.settings.offset.y,   this.wheels.settings.offset.z),
-                new THREE.Vector3(- this.wheels.settings.offset.x, this.wheels.settings.offset.y, - this.wheels.settings.offset.z),
+                new THREE.Vector3(this.wheels.settings.offsetXFront, this.wheels.settings.offsetY,   this.wheels.settings.offsetZ),
+                new THREE.Vector3(this.wheels.settings.offsetXFront, this.wheels.settings.offsetY, - this.wheels.settings.offsetZ),
+                new THREE.Vector3(this.wheels.settings.offsetXBack,  this.wheels.settings.offsetY,   this.wheels.settings.offsetZ),
+                new THREE.Vector3(this.wheels.settings.offsetXBack,  this.wheels.settings.offsetY, - this.wheels.settings.offsetZ),
             ]
             
             let i = 0
@@ -159,7 +180,7 @@ export class Vehicle
                 this.controller.setWheelSuspensionRelaxation(i, this.wheels.settings.suspensionRelaxation)
                 this.controller.setWheelSuspensionStiffness(i, this.wheels.settings.suspensionStiffness)
 
-                wheel.visual.scale.set(this.wheels.settings.radius, this.wheels.settings.radius, 1)
+                // wheel.visual.scale.set(this.wheels.settings.radius, this.wheels.settings.radius, 1)
                 wheel.visual.position.copy(wheel.basePosition)
 
                 i++
@@ -176,7 +197,10 @@ export class Vehicle
                 expanded: true,
             })
 
-            debugPanel.addBinding(this.wheels.settings, 'offset', { min: -1, max: 1, step: 0.01 }).on('change', this.wheels.updateSettings)
+            debugPanel.addBinding(this.wheels.settings, 'offsetXFront', { min: -1, max: 1, step: 0.01 }).on('change', this.wheels.updateSettings)
+            debugPanel.addBinding(this.wheels.settings, 'offsetXBack', { min: -1, max: 1, step: 0.01 }).on('change', this.wheels.updateSettings)
+            debugPanel.addBinding(this.wheels.settings, 'offsetY', { min: -1, max: 1, step: 0.01 }).on('change', this.wheels.updateSettings)
+            debugPanel.addBinding(this.wheels.settings, 'offsetZ', { min: -1, max: 1, step: 0.01 }).on('change', this.wheels.updateSettings)
             debugPanel.addBinding(this.wheels.settings, 'radius', { min: 0, max: 1, step: 0.01 }).on('change', this.wheels.updateSettings)
             debugPanel.addBinding(this.wheels.settings, 'frictionSlip', { min: 0, max: 1, step: 0.01 }).on('change', this.wheels.updateSettings)
             debugPanel.addBinding(this.wheels.settings, 'maxSuspensionForce', { min: 0, max: 1000, step: 1 }).on('change', this.wheels.updateSettings)

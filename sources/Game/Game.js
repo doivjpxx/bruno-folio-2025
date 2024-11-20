@@ -35,6 +35,8 @@ export class Game
                     { path: 'matcaps/grassOnGreen.png', type: 'texture', name: 'matcapGrassOnGreen' },
                     { path: 'bush/bush-leaves-3.png', type: 'texture', name: 'bushLeaves' },
                     { path: 'noises-256x256.png', type: 'texture', name: 'noisesTexture' },
+                    { path: 'vehicle/chassis.glb', type: 'gltf', name: 'vehicleChassis' },
+                    { path: 'vehicle/wheel.glb', type: 'gltf', name: 'vehicleWheel' },
                 ],
                 (resources) =>
                 {

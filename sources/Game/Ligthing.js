@@ -22,7 +22,7 @@ export class Lighting
 
         for(let i = 0; i < this.count; i++)
         {
-            const light = new THREE.DirectionalLight(0xffffff, 1)
+            const light = new THREE.DirectionalLight(0xffffff, 5)
             light.position.setFromSpherical(this.spherical)
             light.castShadow = true
             
