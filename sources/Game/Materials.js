@@ -43,6 +43,12 @@ export class Materials
             this.debugPanel.addBinding(material.userData, 'intensity', { min: 0, max: 300, step: 1 }).on('change', update)
             this.debugPanel.addBinding(dummy, 'color', { color: { type: 'float' } }).on('change', update)
         }
+
+        // Pure white
+        const pureWhite = new THREE.MeshLambertNodeMaterial()
+        pureWhite.positionNode = this.lightPositionNode(color('#ffffff'), this.getTotalShadow(pureWhite))
+        pureWhite.outputNode = this.lightOutputNode()
+        this.save('pureWhite', pureWhite)
     
         // Emissive headlight
         const emissiveWarnWhite = new THREE.MeshBasicNodeMaterial({ color: '#fba866' })
@@ -59,7 +65,6 @@ export class Materials
         emissiveRed.color.multiplyScalar(emissiveRed.userData.intensity / getLuminance(emissiveRed.color))
         createEmissiveTweak(emissiveRed)
         this.save('emissiveRed', emissiveRed)
-
     }
 
     setNodes()
@@ -72,6 +77,20 @@ export class Materials
         this.coreShadowEdgeLow = uniform(float(-0.25))
         this.coreShadowEdgeHigh = uniform(float(1))
 
+        // Get total shadow
+        this.getTotalShadow = (material) =>
+        {
+            const totalShadows = float(1).toVar()
+            material.receivedShadowNode = Fn(([ shadow ]) => 
+            {
+                totalShadows.mulAssign(shadow)
+                return float(1)
+            })
+
+            return totalShadows
+        }
+
+        // Position to update varying
         const finalColor = varying(vec3())
         this.lightPositionNode = Fn(([colorBase, totalShadows]) =>
         {
@@ -100,6 +119,7 @@ export class Materials
             return positionLocal
         })
 
+        // Light output
         this.lightOutputNode = Fn(() =>
         {
             return vec4(finalColor.rgb, 1)
@@ -139,10 +159,14 @@ export class Materials
 
                     // Pure
                     const pureColor = material.color.clone()
-                    const pureColorVector = new THREE.Vector3(pureColor.r, pureColor.g, pureColor.b)
-                    if(pureColorVector.length() > 1)
-                        pureColorVector.setLength(1)
-                    pureColor.set(pureColorVector.x, pureColorVector.y, pureColorVector.z)
+                    const maxLength = Math.max(pureColor.r, Math.max(pureColor.g, pureColor.b))
+                    // console.log(name)
+                    // console.log(maxLength)
+                    // console.log(pureColor.r, pureColor.g, pureColor.b)
+                    if(maxLength > 1)
+                    {
+                        pureColor.set(pureColor.r / maxLength, pureColor.g / maxLength, pureColor.b / maxLength)
+                    }
                     
                     const boxPure = new THREE.Mesh(this.tests.boxGeometry, new THREE.MeshBasicMaterial({ color: pureColor }))
                     boxPure.position.y = 0.75
@@ -171,7 +195,6 @@ export class Materials
                     this.tests.group.add(sphere)
 
                     this.tests.list.set(name, test)
-                    console.log('new test', name)
                 }
             })
         }
@@ -219,15 +242,7 @@ export class Materials
             material.shadowSide = THREE.BackSide
 
             // Shadow receive
-            const totalShadows = float(1).toVar()
-            material.receivedShadowNode = Fn(([ shadow ]) => 
-            {
-                totalShadows.mulAssign(shadow)
-                return float(1)
-            })
-
-            // Output
-            material.positionNode = this.lightPositionNode(baseMaterial.color, totalShadows)
+            material.positionNode = this.lightPositionNode(baseMaterial.color, this.getTotalShadow(material))
             material.outputNode = this.lightOutputNode()
         }
 
