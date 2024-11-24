@@ -117,16 +117,15 @@ export class BlackFriday
         this.fragments.containerElement = this.element.querySelector('.fragments')
         this.fragments.fragmentElements = this.fragments.containerElement.querySelectorAll('.fragment')
 
-        this.fragments.code = 'abc'
+        console.log(this.game.resources.fragments.scene.children)
+        this.fragments.code = 'abcde'
         this.fragments.list = [
-            { position: new THREE.Vector3(7, 1, 0), character: this.fragments.code[0] },
-            { position: new THREE.Vector3(7, 1, 5), character: this.fragments.code[1] },
-            { position: new THREE.Vector3(7, 1, 10), character: this.fragments.code[2] },
+            { position: this.game.resources.fragments.scene.children[0].position, character: this.fragments.code[0] },
+            { position: this.game.resources.fragments.scene.children[1].position, character: this.fragments.code[1] },
+            { position: this.game.resources.fragments.scene.children[2].position, character: this.fragments.code[2] },
+            { position: this.game.resources.fragments.scene.children[3].position, character: this.fragments.code[3] },
+            { position: this.game.resources.fragments.scene.children[4].position, character: this.fragments.code[4] },
         ]
-
-        const material = new THREE.MeshBasicNodeMaterial()
-        material.color.set(20, 4, 40)
-        const geometry = new THREE.IcosahedronGeometry(0.2, 1)
 
         let i = 0
         for(const _fragment of this.fragments.list)
