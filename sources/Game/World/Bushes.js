@@ -7,15 +7,126 @@ import { remap } from '../utilities/maths.js'
 
 export class Bushes
 {
-    constructor(_items)
+    constructor()
     {
         this.game = new Game()
 
-        this.items = _items
-
+        this.items = this.getFromModel()
+        // this.items = this.getOne()
+        // this.items = this.getRandomClusters()
+        // this.items = this.getGrid()
+        
         this.setGeometry()
         this.setMaterial()
         this.setInstancedMesh()
+    }
+
+    getFromModel()
+    {
+        const towardCamera = this.game.view.spherical.offset.clone().normalize()
+        const items = []
+
+        for(const _child of this.game.resources.bushes.scene.children)
+        {
+            const size = _child.scale.x
+
+            const object = new THREE.Object3D()
+            
+            const angle = Math.PI * 2 * Math.random()
+            object.up.set(Math.sin(angle), Math.cos(angle), 0)
+            object.lookAt(towardCamera)
+
+            object.position.copy(_child.position)
+
+            object.scale.setScalar(size)
+            object.updateMatrix()
+
+            items.push(object.matrix)
+        }
+
+        return items
+    }
+    
+    getOne()
+    {
+        const towardCamera = this.game.view.spherical.offset.clone().normalize()
+        const items = []
+        const object = new THREE.Object3D()
+        object.lookAt(towardCamera)
+        object.position.z = -4
+        object.updateMatrix()
+
+        items.push(object.matrix)
+
+        return items
+    }
+
+    getRandomClusters()
+    {
+        const towardCamera = this.game.view.spherical.offset.clone().normalize()
+        const items = []
+
+        for(let i = 0; i < 80; i++)
+        {
+            const clusterPosition = new THREE.Vector2(
+                (Math.random() - 0.5) * 50,
+                (Math.random() - 0.5) * 50
+            )
+
+            const clusterCount = 3 + Math.floor(Math.random() * 5)
+            for(let j = 3; j < clusterCount; j++)
+            {
+                const size = remap(Math.random(), 0, 1, 0.5, 1.25)
+
+                const object = new THREE.Object3D()
+                
+                const angle = Math.PI * 2 * Math.random()
+                object.up.set(Math.sin(angle), Math.cos(angle), 0)
+                object.lookAt(towardCamera)
+
+                object.position.set(
+                    clusterPosition.x + (Math.random() - 0.5) * 3,
+                    size * 0.5,
+                    clusterPosition.y + (Math.random() - 0.5) * 3
+                )
+
+                object.scale.setScalar(size)
+                object.updateMatrix()
+
+                items.push(object.matrix)
+            }
+        }
+
+        return items
+    }
+
+    getGrid()
+    {
+        const towardCamera = this.game.view.spherical.offset.clone().normalize()
+        const items = []
+        const subdivisions = 100
+        for(let i = 0; i < subdivisions; i++)
+        {
+            for(let j = 0; j < subdivisions; j++)
+            {
+                const x = ((i / subdivisions) - 0.5) * subdivisions * 10
+                const z = ((j / subdivisions) - 0.5) * subdivisions * 10
+
+                const object = new THREE.Object3D()
+                
+                const angle = Math.PI * 2 * Math.random()
+                object.up.set(Math.sin(angle), Math.cos(angle), 0)
+                object.lookAt(towardCamera)
+
+                object.position.set(x, 0.25, z)
+
+                object.updateMatrix()
+
+                items.push(object.matrix)
+            }
+        }
+
+        return items
     }
 
     setGeometry()

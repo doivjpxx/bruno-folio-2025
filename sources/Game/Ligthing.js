@@ -8,7 +8,7 @@ export class Lighting
     {
         this.game = new Game()
 
-        this.spherical = new THREE.Spherical(25, 1.44, 1.31)
+        this.spherical = new THREE.Spherical(25, 1.34, 1.31)
         this.direction = new THREE.Vector3().setFromSpherical(this.spherical).normalize()
         this.directionUniform = uniform(this.direction)
         this.colorUniform = uniform(color('#ffffff'))
@@ -19,7 +19,7 @@ export class Lighting
         this.shadowAmplitude = 25
         this.near = 1
         this.depth = 100
-        this.shadowBias = - 0.01
+        this.shadowBias = 0
         this.shadowNormalBias = 0
 
         for(let i = 0; i < this.count; i++)
