@@ -54,7 +54,8 @@ export class FragmentObject
 
         this.caught = true
 
-        gsap.to(this.group1.position, { y: '+= 1', duration: 1.5, ease: 'elastic.out(1.5,0.4)' })
+        // gsap.to(this.group1.position, { y: '+= 1', duration: 1.5, ease: 'elastic.out(1.5,0.4)' })
+        gsap.to(this.main.scale, { x: '1.1', y: '1.1', z: '1.1', duration: 1.2, ease: 'elastic.out(15,0.3)' })
 
         gsap.to(this, { scale: 0, duration: 0.5, delay: 1.5, ease: 'power4.in', onComplete: () =>
         {
