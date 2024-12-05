@@ -141,15 +141,15 @@ export class Materials
         // Light output
         this.lightOutputNode = Fn(([colorBase, totalShadows]) =>
         {
-            const finalColor = colorBase.toVar()
+            const noShadeColor = colorBase.toVar()
 
             // Light
-            finalColor.assign(finalColor.mul(this.game.lighting.colorUniform.mul(this.game.lighting.intensityUniform)))
+            noShadeColor.assign(noShadeColor.mul(this.game.lighting.colorUniform.mul(this.game.lighting.intensityUniform)))
 
             // Bounce color
             const bounceOrientation = normalWorld.dot(vec3(0, - 1, 0)).smoothstep(this.lightBounceEdgeLow, this.lightBounceEdgeHigh)
             const bounceDistance = this.lightBounceDistance.sub(positionWorld.y).div(this.lightBounceDistance).max(0).pow(2)
-            finalColor.assign(mix(finalColor, this.lightBounceColor, bounceOrientation.mul(bounceDistance)))
+            noShadeColor.assign(mix(noShadeColor, this.lightBounceColor, bounceOrientation.mul(bounceDistance)))
 
             // Core shadow
             const coreShadowMix = normalWorld.dot(this.game.lighting.directionUniform).smoothstep(this.coreShadowEdgeHigh, this.coreShadowEdgeLow)
@@ -158,12 +158,13 @@ export class Materials
             const castShadowMix = totalShadows.oneMinus()
 
             // Combined shadows
-            const combinedShadowMix = max(coreShadowMix, castShadowMix)
+            const combinedShadowMix = max(coreShadowMix, castShadowMix).clamp(0, 1)
             
             const shadowColor = colorBase.rgb.mul(this.shadowColor).rgb
-            finalColor.assign(mix(finalColor, shadowColor, combinedShadowMix))
+            const shadedColor = mix(noShadeColor, shadowColor, combinedShadowMix)
             
-            return vec4(finalColor.rgb, 1)
+            // return vec4(vec3(castShadowMix), 1)
+            return vec4(shadedColor.rgb, 1)
         })
         
         // Debug
