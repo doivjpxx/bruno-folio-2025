@@ -22,18 +22,7 @@ export class Lighting
         this.shadowBias = 0
         this.shadowNormalBias = 0
 
-        for(let i = 0; i < this.count; i++)
-        {
-            const light = new THREE.DirectionalLight(0xffffff, 5)
-            light.position.setFromSpherical(this.spherical)
-            light.castShadow = true
-            
-            this.game.scene.add(light)
-            this.game.scene.add(light.target)
-
-            this.lights.push(light)
-        }
-
+        this.setLights()
         this.updateShadow()
 
         this.game.time.events.on('tick', () =>
@@ -70,6 +59,21 @@ export class Lighting
                 mapSizes[size] = size
             }
             debugPanel.addBinding(this, 'mapSizeMin', { options: mapSizes }).on('change', () => this.updateShadow())
+        }
+    }
+
+    setLights()
+    {
+        for(let i = 0; i < this.count; i++)
+        {
+            const light = new THREE.DirectionalLight(0xffffff, 5)
+            light.position.setFromSpherical(this.spherical)
+            light.castShadow = true
+            
+            this.game.scene.add(light)
+            this.game.scene.add(light.target)
+
+            this.lights.push(light)
         }
     }
 
