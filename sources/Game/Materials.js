@@ -91,8 +91,8 @@ export class Materials
                     title: _name,
                     expanded: true
                 })
-                debugPanel.addBinding({ colorA: threeColorA.getHex(THREE.SRGBColorSpace) }, 'colorA', { view: 'color' }).on('change', (tweak) => { colorA.value.set(tweak.value) })
-                debugPanel.addBinding({ colorB: threeColorB.getHex(THREE.SRGBColorSpace) }, 'colorB', { view: 'color' }).on('change', (tweak) => { colorB.value.set(tweak.value) })
+                this.game.debug.addThreeColorBinding(debugPanel, threeColorA, 'colorA')
+                this.game.debug.addThreeColorBinding(debugPanel, threeColorB, 'colorB')
             }
         }
 
@@ -117,12 +117,13 @@ export class Materials
 
     setNodes()
     {
-        this.lightBounceColor = uniform(color('#646615'))
+        this.lightBounceColor = uniform(color('#72a51e'))
         this.lightBounceEdgeLow = uniform(float(-1))
         this.lightBounceEdgeHigh = uniform(float(1))
         this.lightBounceDistance = uniform(float(1.5))
+        this.lightBounceMultiplier = uniform(float(0.5))
 
-        this.shadowColor = uniform(color('#0085db'))
+        this.shadowColor = uniform(this.game.cycles.day.values.properties.shadowColor.value)
         this.coreShadowEdgeLow = uniform(float(-0.25))
         this.coreShadowEdgeHigh = uniform(float(1))
 
@@ -154,13 +155,13 @@ export class Materials
         {
             const baseColor = inputColor.toVar()
 
-            // Light
-            const lightenColor = baseColor.mul(this.game.lighting.colorUniform.mul(this.game.lighting.intensityUniform))
-
             // Bounce color
             const bounceOrientation = normalWorld.dot(vec3(0, - 1, 0)).smoothstep(this.lightBounceEdgeLow, this.lightBounceEdgeHigh)
             const bounceDistance = this.lightBounceDistance.sub(positionWorld.y).div(this.lightBounceDistance).max(0).pow(2)
-            lightenColor.assign(mix(lightenColor, this.lightBounceColor, bounceOrientation.mul(bounceDistance)))
+            baseColor.assign(mix(baseColor, this.lightBounceColor, bounceOrientation.mul(bounceDistance).mul(this.lightBounceMultiplier)))
+
+            // Light
+            const lightenColor = baseColor.mul(this.game.lighting.colorUniform.mul(this.game.lighting.intensityUniform))
 
             // Core shadow
             const coreShadowMix = normalWorld.dot(this.game.lighting.directionUniform).smoothstep(this.coreShadowEdgeHigh, this.coreShadowEdgeLow)
@@ -183,15 +184,11 @@ export class Materials
         // Debug
         if(this.game.debug.active)
         {
-            this.debugPanel.addBinding({ color: this.lightBounceColor.value.getHex(THREE.SRGBColorSpace) }, 'color', { label: 'lightBounceColor', view: 'color' })
-                .on('change', tweak => { this.lightBounceColor.value.set(tweak.value) })
+            this.game.debug.addThreeColorBinding(this.debugPanel, this.lightBounceColor.value, 'lightBounceColor')
             this.debugPanel.addBinding(this.lightBounceEdgeLow, 'value', { label: 'lightBounceEdgeLow', min: - 1, max: 1, step: 0.01 })
             this.debugPanel.addBinding(this.lightBounceEdgeHigh, 'value', { label: 'lightBounceEdgeHigh', min: - 1, max: 1, step: 0.01 })
             this.debugPanel.addBinding(this.lightBounceDistance, 'value', { label: 'lightBounceDistance', min: 0, max: 5, step: 0.01 })
-
-            this.debugPanel.addBlade({ view: 'separator' })
-            this.debugPanel.addBinding({ color: this.shadowColor.value.getHex(THREE.SRGBColorSpace) }, 'color', { label: 'shadowColor', view: 'color' })
-                .on('change', tweak => { this.shadowColor.value.set(tweak.value) })
+            this.debugPanel.addBinding(this.lightBounceMultiplier, 'value', { label: 'lightBounceMultiplier', min: 0, max: 1, step: 0.01 })
 
             this.debugPanel.addBlade({ view: 'separator' })
             this.debugPanel.addBinding(this.coreShadowEdgeLow, 'value', { label: 'coreShadowEdgeLow', min: - 1, max: 1, step: 0.01 })

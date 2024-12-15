@@ -225,8 +225,7 @@ export class Bushes
                 expanded: false,
             })
 
-            debugPanel.addBinding({ color: baseColor.value.getHex(THREE.SRGBColorSpace) }, 'color', { label: 'baseColor', view: 'color' })
-                .on('change', tweak => { baseColor.value.set(tweak.value) })
+            this.game.debug.addThreeColorBinding(debugPanel, baseColor.value, 'baseColor')
             debugPanel.addBinding(shadowOffset, 'value', { label: 'shadowOffset', min: 0, max: 2, step: 0.001 })
         }
     }

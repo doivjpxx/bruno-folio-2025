@@ -8,7 +8,7 @@ export class Fog
     {
         this.game = Game.getInstance()
         
-        this.color = uniform(color('#00f4ff'))
+        this.color = uniform(color('#b4fbff'))
         this.game.scene.backgroundNode = this.color
 
         this.fogNear = uniform(6)
@@ -22,23 +22,23 @@ export class Fog
             this.update()
         }, 9)
 
-        // Debug
-        if(this.game.debug.active)
-        {
-            const debugPanel = this.game.debug.panel.addFolder({
-                title: '☁️ Fog',
-                expanded: true,
-            })
-
-            debugPanel.addBinding({ color: this.color.value.getHex(THREE.SRGBColorSpace) }, 'color', { view: 'color' })
-                .on('change', tweak => { this.color.value.set(tweak.value) })
-            debugPanel.addBinding(this.fogNear, 'value', { label: 'near', min: 0, max: 100, step: 0.01 })
-            debugPanel.addBinding(this.fogFar, 'value', { label: 'far', min: 0, max: 100, step: 0.01 })
-        }
+        // // Debug
+        // if(this.game.debug.active)
+        // {
+        //     const debugPanel = this.game.debug.panel.addFolder({
+        //         title: '☁️ Fog',
+        //         expanded: true,
+        //     })
+        // }
     }
 
     update()
     {
         this.fogOffset.value.set(this.game.view.focusPoint.position.x, this.game.view.focusPoint.position.z)
+
+        // Apply day cycles values
+        this.fogColor.value.copy(this.game.cycles.day.values.properties.fogColor.value)
+        this.fogNear.value = this.game.cycles.day.values.properties.fogNear.value
+        this.fogFar.value = this.game.cycles.day.values.properties.fogFar.value
     }
 }

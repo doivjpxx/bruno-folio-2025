@@ -182,10 +182,8 @@ export class Grass
                 expanded: false,
             })
 
-            debugPanel.addBinding({ color: colorA.value.getHex(THREE.SRGBColorSpace) }, 'color', { label: 'colorA', view: 'color' })
-                .on('change', tweak => { colorA.value.set(tweak.value) })
-            debugPanel.addBinding({ color: colorB.value.getHex(THREE.SRGBColorSpace) }, 'color', { label: 'colorB', view: 'color' })
-                .on('change', tweak => { colorB.value.set(tweak.value) })
+            this.game.debug.addThreeColorBinding(debugPanel, colorA.value, 'colorA')
+            this.game.debug.addThreeColorBinding(debugPanel, colorB.value, 'colorB')
             debugPanel.addBinding(bladeWidth, 'value', { label: 'bladeWidth', min: 0, max: 1, step: 0.001 })
             debugPanel.addBinding(bladeHeight, 'value', { label: 'bladeHeight', min: 0, max: 2, step: 0.001 })
             debugPanel.addBinding(bladeHeightRandomness, 'value', { label: 'bladeHeightRandomness', min: 0, max: 1, step: 0.001 })
