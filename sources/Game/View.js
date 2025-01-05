@@ -3,6 +3,7 @@ import CameraControls from 'camera-controls'
 import { Game } from './Game.js'
 import { clamp, lerp, remap, smoothstep } from './utilities/maths.js'
 import { mix, vec2, atan2, cos, sin, uniform, PI, vec3, time, modelViewMatrix, cameraProjectionMatrix, viewport, vec4, Fn, positionGeometry, positionLocal, attribute } from 'three/tsl'
+import { degToRad } from 'three/src/math/MathUtils.js'
 
 CameraControls.install( { THREE: THREE } )
 
@@ -49,6 +50,7 @@ export class View
         this.setZoom()
         this.setSpherical()
         this.setCamera()
+        this.setOptimalArea()
         this.setFree()
         this.setSpeedLines()
 
@@ -56,6 +58,8 @@ export class View
         {
             this.update()
         }, 4)
+
+        this.update()
 
         this.game.viewport.events.on('change', () =>
         {
@@ -75,6 +79,69 @@ export class View
         {
             this.focusPoint.isTracking = true
         })
+
+        this.focusPoint.helper = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicNodeMaterial({ color: '#ff0000', wireframe: true }))
+        this.focusPoint.helper.visible = false
+        this.game.scene.add(this.focusPoint.helper)
+    }
+
+    setOptimalArea()
+    {
+        this.optimalArea = {}
+        this.optimalArea.position = new THREE.Vector3()
+        this.optimalArea.radius = 0
+        this.optimalArea.near = new THREE.Vector3()
+        this.optimalArea.far = new THREE.Vector3()
+        this.optimalArea.raycaster = new THREE.Raycaster()
+
+        this.optimalArea.floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)
+
+        this.optimalArea.helpers = {}
+        this.optimalArea.helpers.center = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicNodeMaterial({ color: '#00ff00', wireframe: false }))
+        this.optimalArea.helpers.near = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicNodeMaterial({ color: '#ff0000', wireframe: false }))
+        this.optimalArea.helpers.far = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicNodeMaterial({ color: '#0000ff', wireframe: false }))
+
+        this.optimalArea.helpers.center.visible = false
+        this.optimalArea.helpers.near.visible = false
+        this.optimalArea.helpers.far.visible = false
+
+        this.game.scene.add(
+            this.optimalArea.helpers.center,
+            this.optimalArea.helpers.near,
+            this.optimalArea.helpers.far
+        )
+
+        this.optimalArea.update = () =>
+        {
+            this.camera.updateProjectionMatrix()
+            this.optimalArea.raycaster.setFromCamera(new THREE.Vector2(1, -1), this.camera)
+            this.optimalArea.raycaster.ray.intersectPlane(this.optimalArea.floorPlane, this.optimalArea.near)
+            this.optimalArea.helpers.near.position.copy(this.optimalArea.near)
+
+            this.optimalArea.raycaster.setFromCamera(new THREE.Vector2(-1, 1), this.camera)
+            this.optimalArea.raycaster.ray.intersectPlane(this.optimalArea.floorPlane, this.optimalArea.far)
+            this.optimalArea.helpers.far.position.copy(this.optimalArea.far)
+
+            const centerA = this.optimalArea.near.clone().lerp(this.optimalArea.far, 0.5)
+
+            this.optimalArea.raycaster.setFromCamera(new THREE.Vector2(-1, -1), this.camera)
+            this.optimalArea.raycaster.ray.intersectPlane(this.optimalArea.floorPlane, this.optimalArea.near)
+            this.optimalArea.helpers.near.position.copy(this.optimalArea.near)
+
+            this.optimalArea.raycaster.setFromCamera(new THREE.Vector2(1, 1), this.camera)
+            this.optimalArea.raycaster.ray.intersectPlane(this.optimalArea.floorPlane, this.optimalArea.far)
+            this.optimalArea.helpers.far.position.copy(this.optimalArea.far)
+
+            const centerB = this.optimalArea.near.clone().lerp(this.optimalArea.far, 0.5)
+
+            this.optimalArea.position = centerA.clone().lerp(centerB, 0.5)
+            this.optimalArea.helpers.center.position.copy(this.optimalArea.position)
+
+            const optimalRadius = this.optimalArea.position.distanceTo(this.optimalArea.far)
+
+            if(optimalRadius > this.optimalArea.radius)
+                this.optimalArea.radius = optimalRadius
+        }
     }
 
     setZoom()
@@ -278,8 +345,12 @@ export class View
             }
         }
 
+        // Focus point
         if(this.focusPoint.isTracking)
-            this.focusPoint.position.copy(this.focusPoint.trackedPosition)
+        {
+            this.focusPoint.position.x = this.focusPoint.trackedPosition.x
+            this.focusPoint.position.z = this.focusPoint.trackedPosition.z
+        }
 
         const newSmoothFocusPoint = this.focusPoint.smoothedPosition.clone().lerp(this.focusPoint.position, this.game.time.delta * 10)
         const smoothFocusPointDelta = newSmoothFocusPoint.clone().sub(this.focusPoint.smoothedPosition)
@@ -315,11 +386,14 @@ export class View
             this.camera.lookAt(this.focusPoint.smoothedPosition)
         }
         
-        // Controls mode
-        else
+        // Free mode
+        else if(this.mode === View.FREE_MODE)
         {
             this.freeMode.update(this.game.time.delta)
         }
+
+        // Optimal area
+        this.optimalArea.update()
 
         // Speed lines
         this.speedLines.clipSpaceTarget.value.copy(this.speedLines.worldTarget)

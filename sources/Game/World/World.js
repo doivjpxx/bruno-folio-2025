@@ -28,6 +28,8 @@ export class World
         this.bricks = new Bricks()
         // this.playground = new Playground()
         // this.christmas = new Christmas()
+
+        // this.setAxesHelper()
     }
 
     setTestShadow()

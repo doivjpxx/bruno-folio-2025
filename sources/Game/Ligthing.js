@@ -87,7 +87,7 @@ export class Lighting
         this.cloudsSpeed = uniform(1)
         this.cloudsEdgeLow = uniform(0.2)
         this.cloudsEdgeHigh = uniform(0.5)
-        this.cloudsMultiplier = uniform(0.7)
+        this.cloudsMultiplier = uniform(0.4)
 
         this.waterThreshold = uniform(-0.3)
         this.waterAmplitude = uniform(0.3)
@@ -266,14 +266,10 @@ export class Lighting
         }
         this.direction.setFromSpherical(this.spherical).normalize()
         
-        // Offset (TODO: optimise)
-        const offset = new THREE.Vector3(0, 0, -5)
-
         for(const light of this.lights)
         {
-
-            light.position.setFromSpherical(this.spherical).add(this.game.view.focusPoint.position).add(offset)
-            light.target.position.copy(this.game.view.focusPoint.position).add(offset)
+            light.position.setFromSpherical(this.spherical).add(this.game.view.optimalArea.position)
+            light.target.position.copy(this.game.view.optimalArea.position)
         }
 
         // Helper

@@ -13,11 +13,12 @@ export class WaterSurface
         this.timeFrequency = 0.01
 
         // Geometry
-        this.geometry = new THREE.PlaneGeometry(80, 80, 1, 1)
+        const halfExtent = this.game.view.optimalArea.radius
+        this.geometry = new THREE.PlaneGeometry(halfExtent * 2, halfExtent * 2, 1, 1)
         this.geometry.rotateX(- Math.PI * 0.5)
 
         // Material
-        this.material = new THREE.MeshLambertNodeMaterial({ color: '#000000', wireframe: false })
+        this.material = new THREE.MeshLambertNodeMaterial({ color: '#ffffff', wireframe: false })
 
         const totalShadow = this.game.lighting.addTotalShadowToMaterial(this.material)
 
@@ -80,12 +81,9 @@ export class WaterSurface
 
     update()
     {
-        // Water surface
         this.localTime.value += this.game.time.deltaScaled * this.timeFrequency
 
-        // TODO: Mutualise formula as for grass
-        const offset = new THREE.Vector3(this.game.view.spherical.offset.x, 0, this.game.view.spherical.offset.z).setLength(80 / 2).negate()
-        this.mesh.position.x = this.game.view.position.x + offset.x
-        this.mesh.position.z = this.game.view.position.z + offset.z
+        this.mesh.position.x = this.game.view.optimalArea.position.x
+        this.mesh.position.z = this.game.view.optimalArea.position.z
     }
 }

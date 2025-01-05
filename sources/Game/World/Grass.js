@@ -8,8 +8,9 @@ export class Grass
     {
         this.game = Game.getInstance()
 
-        this.subdivisions = 500
-        this.size = 80
+        this.subdivisions = 280
+        const halfExtent = this.game.view.optimalArea.radius
+        this.size = halfExtent * 2
         this.count = this.subdivisions * this.subdivisions
         this.fragmentSize = this.size / this.subdivisions
 
@@ -195,12 +196,7 @@ export class Grass
 
     update()
     {
-        // Move grass slightly forward
-        const offset = new THREE.Vector2(this.game.view.spherical.offset.x, this.game.view.spherical.offset.z).setLength(this.size / 2).negate()
-        this.center.value.set(
-            this.game.view.position.x,
-            this.game.view.position.z
-        ).add(offset)
+        this.center.value.copy(this.game.view.optimalArea.position)
 
         // Ground data delta
         this.groundDataDelta.value.set(
