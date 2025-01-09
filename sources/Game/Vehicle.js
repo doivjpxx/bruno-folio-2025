@@ -48,7 +48,7 @@ export class Vehicle
         this.setWheels()
         this.setStop()
         this.setFlip()
-        this.setInWater()
+        // this.setInWater()
         this.setUnstuck()
         this.setReset()
         this.setHydraulics()
@@ -122,6 +122,7 @@ export class Vehicle
                     { shape: 'cuboid', mass: 0, parameters: [ 1.5, 0.5, 0.9 ], position: { x: 0.1, y: -0.2, z: 0 }, category: 'bumper' }, // Bumper
                 ],
                 canSleep: false,
+                waterGravityMultiplier: - 1
             },
             this.parts.chassis
         )
@@ -307,30 +308,30 @@ export class Vehicle
         }
     }
 
-    setInWater()
-    {
-        this.inWater = {}
-        this.inWater.active = false
-        this.inWater.threshold = 0
+    // setInWater()
+    // {
+    //     this.inWater = {}
+    //     this.inWater.active = false
+    //     this.inWater.threshold = 0
         
-        this.inWater.activate = () =>
-        {
-            if(this.inWater.active)
-                return
+    //     this.inWater.activate = () =>
+    //     {
+    //         if(this.inWater.active)
+    //             return
 
-            this.inWater.active = true
-            this.events.trigger('inWater')
-        }
+    //         this.inWater.active = true
+    //         this.events.trigger('inWater')
+    //     }
         
-        this.inWater.deactivate = () =>
-        {
-            if(!this.inWater.active)
-                return
+    //     this.inWater.deactivate = () =>
+    //     {
+    //         if(!this.inWater.active)
+    //             return
                 
-            this.inWater.active = false
-            this.events.trigger('outWater')
-        }
-    }
+    //         this.inWater.active = false
+    //         this.events.trigger('outWater')
+    //     }
+    // }
 
     setUnstuck()
     {
@@ -578,37 +579,6 @@ export class Vehicle
             this.controller.setWheelBrake(i, brake * 0.2 * this.game.time.deltaScaled)
             this.controller.setWheelEngineForce(i, this.wheels.engineForce * 0.01)
         }
-
-        // Water controls
-        if(this.inWater.active && this.wheels.inContact <= 1)
-        {
-            // Forward / background impulse
-            const waterImpulse = new THREE.Vector3(0, 0, 0)
-
-            if(this.game.inputs.keys.forward)
-                waterImpulse.add(this.forward)
-
-            if(this.game.inputs.keys.backward)
-                waterImpulse.sub(this.forward)
-
-            waterImpulse.multiplyScalar(this.chassis.physical.body.mass() * 0.02)
-            this.chassis.physical.body.applyImpulse(waterImpulse)
-
-            // Left / right torque
-            let torqueY = 0
-            if(this.game.inputs.keys.left)
-                torqueY = 0.02
-            else if(this.game.inputs.keys.right)
-                torqueY = -0.02
-
-            if(this.upsideDownRatio > 0.5)
-                torqueY *= -1
-
-            const torque = new THREE.Vector3(0, torqueY, 0)
-            torque.applyQuaternion(this.chassis.physical.body.rotation())
-
-            this.chassis.physical.body.applyTorqueImpulse(torque)
-        }
     }
 
     updatePostPhysics()
@@ -641,11 +611,11 @@ export class Vehicle
         else
             this.flip.deactivate()
 
-        // In water
-        if(this.position.y < this.inWater.threshold)
-            this.inWater.activate()
-        else
-            this.inWater.deactivate()
+        // // In water
+        // if(this.position.y < this.inWater.threshold)
+        //     this.inWater.activate()
+        // else
+        //     this.inWater.deactivate()
         
         // Wheels
         this.wheels.visualSteering += (this.wheels.steering - this.wheels.visualSteering) * this.game.time.deltaScaled * 16

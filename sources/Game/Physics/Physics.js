@@ -12,10 +12,7 @@ export class Physics
 
         this.world = new RAPIER.World({ x: 0.0, y: -9.81, z: 0.0 })
 
-        this.water = {}
-        this.water.edgeLow = 0
-        this.water.edgeHigh = -0.4
-        this.water.gravityMultiplier = - 0.75 // - 0.75
+        this.physicals = []
 
         this.groups = {
             all: 0b0000000000000001,
@@ -57,10 +54,6 @@ export class Physics
                 expanded: false,
             })
             this.debugPanel.addBinding(this.world.gravity, 'y', { min: - 20, max: 20, step: 0.01 })
-            this.debugPanel.addBlade({ view: 'separator' })
-            this.debugPanel.addBinding(this.water, 'edgeLow', { label: 'waterEdgeLow', min: -1, max: 0 })
-            this.debugPanel.addBinding(this.water, 'edgeHigh', { label: 'waterEdgeHigh', min: -1, max: 0 })
-            this.debugPanel.addBinding(this.water, 'gravityMultiplier', { label: 'waterGravityMultiplier', min: -1, max: 1 })
         }
     }
 
@@ -77,6 +70,9 @@ export class Physics
     getPhysical(_physicalDescription)
     {
         const physical = {}
+
+        // Attributes
+        physical.waterGravityMultiplier = typeof _physicalDescription.waterGravityMultiplier !== 'undefined' ? _physicalDescription.waterGravityMultiplier : - 1.5
 
         // Body
         let rigidBodyDesc = RAPIER.RigidBodyDesc
@@ -150,6 +146,8 @@ export class Physics
             physical.colliders.push(collider)
         }
 
+        this.physicals.push(physical)
+
         return physical
     }
 
@@ -161,12 +159,11 @@ export class Physics
             _vehicleController.updateVehicle(this.game.time.delta)
         })
     
-        this.world.bodies.forEach((_child) =>
+        for(const physical of this.physicals)
         {
-            const position = _child.translation()
-            const waterGravity = remapClamp(position.y, this.water.edgeLow, this.water.edgeHigh, 1, this.water.gravityMultiplier)
-            _child.setGravityScale(waterGravity)
-        })
+            const depth = Math.max(- physical.body.translation().y, 0)
+            physical.body.setGravityScale(1 + depth * physical.waterGravityMultiplier)
+        }
         
         this.world.step()
     }
