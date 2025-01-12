@@ -13,6 +13,7 @@ import { Trees } from './Trees.js'
 import Bushes from './Bushes.js'
 import { WaterSurface } from './WaterSurface.js'
 import { Scenery } from './Scenery.js'
+import { WindLines } from './WindLines.js'
 
 export class World
 {
@@ -21,15 +22,16 @@ export class World
         this.game = Game.getInstance()
 
         this.floor = new Floor()
-        this.secnery = new Scenery()
-        this.waterSurface = new WaterSurface()
-        this.grass = new Grass()
-        this.bushes = new Bushes()
-        this.birchTrees = new Trees('Birch Tree', this.game.resources.birchTreesVisualModel.scene, this.game.resources.birchTreesReferencesModel.scene.children, '#ff782b')
-        this.oakTrees = new Trees('Oak Tree', this.game.resources.oakTreesVisualModel.scene, this.game.resources.oakTreesReferencesModel.scene.children, '#c4c557')
-        this.cherryTrees = new Trees('Cherry Tree', this.game.resources.cherryTreesVisualModel.scene, this.game.resources.cherryTreesReferencesModel.scene.children, '#ff6da8')
-        this.flowers = new Flowers()
-        this.bricks = new Bricks()
+        // this.secnery = new Scenery()
+        // this.waterSurface = new WaterSurface()
+        // this.grass = new Grass()
+        // this.bushes = new Bushes()
+        // this.birchTrees = new Trees('Birch Tree', this.game.resources.birchTreesVisualModel.scene, this.game.resources.birchTreesReferencesModel.scene.children, '#ff782b')
+        // this.oakTrees = new Trees('Oak Tree', this.game.resources.oakTreesVisualModel.scene, this.game.resources.oakTreesReferencesModel.scene.children, '#c4c557')
+        // this.cherryTrees = new Trees('Cherry Tree', this.game.resources.cherryTreesVisualModel.scene, this.game.resources.cherryTreesReferencesModel.scene.children, '#ff6da8')
+        // this.flowers = new Flowers()
+        // this.bricks = new Bricks()
+        this.windLines = new WindLines()
         // this.playground = new Playground()
         // this.christmas = new Christmas()
 

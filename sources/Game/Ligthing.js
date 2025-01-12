@@ -68,7 +68,7 @@ export class Lighting
                 const size = Math.pow(2, i + 1)
                 mapSizes[size] = size
             }
-            this.debugPanel.addBinding(this, 'mapSizeMin', { options: mapSizes }).on('change', () => this.updateShadow())
+            // this.debugPanel.addBinding(this, 'mapSizeMin', { options: mapSizes }).on('change', () => this.updateShadow())
         }
     }
 
@@ -176,12 +176,12 @@ export class Lighting
             this.debugPanel.addBinding(this.coreShadowEdgeLow, 'value', { label: 'coreShadowEdgeLow', min: - 1, max: 1, step: 0.01 })
             this.debugPanel.addBinding(this.coreShadowEdgeHigh, 'value', { label: 'coreShadowEdgeHigh', min: - 1, max: 1, step: 0.01 })
 
-            this.debugPanel.addBlade({ view: 'separator' })
-            this.debugPanel.addBinding(this.cloudsFrequency, 'value', { label: 'cloudsFrequency', min: 0, max: 0.1, step: 0.001 })
-            this.debugPanel.addBinding(this.cloudsSpeed, 'value', { label: 'cloudsSpeed', min: 0, max: 10, step: 0.01 })
-            this.debugPanel.addBinding(this.cloudsEdgeLow, 'value', { label: 'cloudsEdgeLow', min: 0, max: 1, step: 0.001 })
-            this.debugPanel.addBinding(this.cloudsEdgeHigh, 'value', { label: 'cloudsEdgeHigh', min: 0, max: 1, step: 0.001 })
-            this.debugPanel.addBinding(this.cloudsMultiplier, 'value', { label: 'cloudsMultiplier', min: 0, max: 1, step: 0.001 })
+            // this.debugPanel.addBlade({ view: 'separator' })
+            // this.debugPanel.addBinding(this.cloudsFrequency, 'value', { label: 'cloudsFrequency', min: 0, max: 0.1, step: 0.001 })
+            // this.debugPanel.addBinding(this.cloudsSpeed, 'value', { label: 'cloudsSpeed', min: 0, max: 10, step: 0.01 })
+            // this.debugPanel.addBinding(this.cloudsEdgeLow, 'value', { label: 'cloudsEdgeLow', min: 0, max: 1, step: 0.001 })
+            // this.debugPanel.addBinding(this.cloudsEdgeHigh, 'value', { label: 'cloudsEdgeHigh', min: 0, max: 1, step: 0.001 })
+            // this.debugPanel.addBinding(this.cloudsMultiplier, 'value', { label: 'cloudsMultiplier', min: 0, max: 1, step: 0.001 })
 
             this.debugPanel.addBlade({ view: 'separator' })
             this.debugPanel.addBinding(this.waterThreshold, 'value', { label: 'waterThreshold', min: -1, max: 0, step: 0.001 })
