@@ -1,5 +1,7 @@
+import { uniform } from 'three/tsl'
 import { Events } from './Events.js'
 import { Game } from './Game.js'
+import gsap from 'gsap'
 
 export class Time
 {
@@ -13,6 +15,13 @@ export class Time
         this.scale = 2
         this.deltaScaled = this.delta * this.scale
         this.elapsedScaled = 0
+
+        gsap.globalTimeline.timeScale(this.scale)
+
+        this.elapsedUniform = uniform(this.elapsed)
+        this.deltaUniform = uniform(this.delta)
+        this.elapsedScaledUniform = uniform(this.elapsedScaled)
+        this.deltaScaledUniform = uniform(this.deltaScaled)
 
         this.events = new Events()
         // this.setTick()
@@ -45,6 +54,11 @@ export class Time
         this.elapsed = elapsedSeconds
         this.deltaScaled = this.delta * this.scale
         this.elapsedScaled += this.deltaScaled
+
+        this.elapsedUniform.value = this.elapsed
+        this.deltaUniform.value = this.delta
+        this.elapsedScaledUniform.value = this.elapsedScaled
+        this.deltaScaledUniform.value = this.deltaScaled
 
         this.events.trigger('tick')
     }

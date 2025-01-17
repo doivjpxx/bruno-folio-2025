@@ -2,7 +2,7 @@ import * as THREE from 'three/webgpu'
 import CameraControls from 'camera-controls'
 import { Game } from './Game.js'
 import { clamp, lerp, smoothstep } from './utilities/maths.js'
-import { mix, uniform, time, vec4, Fn, positionGeometry, attribute } from 'three/tsl'
+import { mix, uniform, vec4, Fn, positionGeometry, attribute } from 'three/tsl'
 
 CameraControls.install( { THREE: THREE } )
 
@@ -243,7 +243,7 @@ export class View
         this.speedLines.smoothedStrength = uniform(this.speedLines.strength)
         this.speedLines.worldTarget = new THREE.Vector3()
         this.speedLines.clipSpaceTarget = uniform(new THREE.Vector3())
-        this.speedLines.speed = uniform(25)
+        this.speedLines.speed = uniform(12)
 
         const linesCount = 30
         const positionArray = new Float32Array(linesCount * 3 * 3)
@@ -315,7 +315,7 @@ export class View
             const distance = attribute('distance')
             const tipness = attribute('tipness')
             
-            const osciliation = time.mul(this.speedLines.speed).add(timeRandomness).sin().div(2).add(0.5)
+            const osciliation = this.game.time.elapsedScaledUniform.mul(this.speedLines.speed).add(timeRandomness).sin().div(2).add(0.5)
             const newPosition = mix(positionGeometry.xy, this.speedLines.clipSpaceTarget.xy, tipness.mul(osciliation).mul(distance).mul(this.speedLines.smoothedStrength))
             
             return vec4(newPosition, 0, 1)

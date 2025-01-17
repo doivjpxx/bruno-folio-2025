@@ -1,6 +1,6 @@
 import * as THREE from 'three/webgpu'
 import { Game } from '../Game.js'
-import { color, float, Fn, hash, instance, instancedBufferAttribute, instanceIndex, luminance, mix, PI2, positionLocal, sin, storage, texture, time, uniform, uniformArray, uv, vec3, vec4 } from 'three/tsl'
+import { color, float, Fn, hash, instance, instancedBufferAttribute, instanceIndex, luminance, mix, PI2, positionLocal, sin, storage, texture, uniform, uniformArray, uv, vec3, vec4 } from 'three/tsl'
 import { remap, smoothstep } from '../utilities/maths.js'
 import gsap from 'gsap'
 
@@ -88,7 +88,7 @@ export class PoleLights
 
         const material = new THREE.SpriteNodeMaterial({ color: this.emissives.onMaterial.color })
 
-        const baseTime = time.add(hash(instanceIndex).mul(999))
+        const baseTime = this.game.time.elapsedScaledUniform.add(hash(instanceIndex).mul(999))
         const flyOffset = vec3(
             sin(baseTime.mul(0.4)).mul(0.5),
             sin(baseTime).mul(0.2),

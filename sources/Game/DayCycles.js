@@ -34,7 +34,7 @@ export class DayCycles
 
     setDay()
     {
-        this.progress = 0.05
+        this.progress = 0.2
         this.manualProgress = this.progress
         this.manualProgressChanged = true
         this.speed = 0.005

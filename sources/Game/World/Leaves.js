@@ -10,14 +10,14 @@ export class Leaves
     {
         this.game = Game.getInstance()
 
-        this.count = Math.pow(2, 16)
+        this.count = Math.pow(2, 13)
 
         // Debug
         if(this.game.debug.active)
         {
             this.debugPanel = this.game.debug.panel.addFolder({
                 title: '🍃 Leaves',
-                expanded: true,
+                expanded: false,
             })
         }
 
@@ -57,12 +57,12 @@ export class Leaves
         this.rotationFrequency = uniform(3)
         this.rotationElevationMultiplier = uniform(1)
         this.pushOutMultiplier = uniform(0.1)
-        this.pushMultiplier = uniform(0.5)
+        this.pushMultiplier = uniform(0.4)
         this.windFrequency = uniform(0.005)
         this.windMultiplier = uniform(0.002)
         this.upwardMultiplier = uniform(0.2)
         this.defaultDamping = uniform(0.02)
-        this.waterDamping = uniform(0.005)
+        this.waterDamping = uniform(0.01)
         this.gravity = uniform(0.01)
 
         // Buffers

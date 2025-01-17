@@ -1,6 +1,6 @@
 import * as THREE from 'three/webgpu'
 import { Game } from './Game.js'
-import { uniform, color, float, vec2, time, texture, Fn, vec4, positionWorld, normalWorld, vec3, mix, max } from 'three/tsl'
+import { uniform, color, float, Fn, vec4, positionWorld, normalWorld, vec3, mix, max } from 'three/tsl'
 
 export class Lighting
 {

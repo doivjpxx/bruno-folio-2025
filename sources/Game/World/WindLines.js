@@ -2,94 +2,7 @@ import * as THREE from 'three/webgpu'
 import { Game } from '../Game.js'
 import { attribute, cameraNormalMatrix, cameraPosition, cameraProjectionMatrix, cameraViewMatrix, color, cross, float, floor, Fn, If, modelNormalMatrix, modelViewMatrix, modelWorldMatrix, mul, normalLocal, normalWorld, positionGeometry, positionLocal, positionWorld, uniform, vec2, vec3, vec4, vertexIndex, viewport } from 'three/tsl'
 import gsap from 'gsap'
-
-class WindLineGeometry extends THREE.BufferGeometry
-{
-    constructor(length = 10, handlesCount = 4, amplitude = 1, divisions = 30)
-    {
-        super()
-
-        this.type = 'LatheGeometry'
-
-        this.parameters = {
-            length,
-            handlesCount,
-            amplitude,
-            divisions
-        };
-
-        // Handles
-        const halfExtent = length / 2
-        const handleSpan = length / (handlesCount - 1)
-        const handles = []
-
-        for(let i = 0; i < handlesCount; i++)
-        {
-            handles.push(new THREE.Vector3(
-                0,
-                i % 2 - 0.5 * amplitude,
-                - halfExtent + i * handleSpan
-            ))
-        }
-
-        // Curve
-        const curve = new THREE.CatmullRomCurve3(handles)
-        const points = curve.getPoints(divisions)
-        
-        const positions = new Float32Array(divisions * 3 * 2)
-        const directions = new Float32Array(divisions * 3 * 2)
-        const ratios = new Float32Array(divisions * 2)
-        const indices = new Uint16Array((divisions - 1) * 2 * 3)
-        
-        for(let i = 0; i < divisions; i++)
-        {
-            const i2 = i * 2
-            const i6 = i * 6
-
-            const point = points[i]
-            const nextPoint = points[Math.min(i + 1, divisions - 1)]
-            // TODO: handle latest point
-
-            // Position
-            positions[i6 + 0] = point.x
-            positions[i6 + 1] = point.y
-            positions[i6 + 2] = point.z
-
-            positions[i6 + 3] = point.x
-            positions[i6 + 4] = point.y
-            positions[i6 + 5] = point.z
-
-            // Direction
-            const direction = nextPoint.clone().sub(point).normalize()
-
-            directions[i6 + 0] = direction.x
-            directions[i6 + 1] = direction.y
-            directions[i6 + 2] = direction.z
-
-            directions[i6 + 3] = direction.x
-            directions[i6 + 4] = direction.y
-            directions[i6 + 5] = direction.z
-
-            // Progress
-            ratios[i2 + 0] = i / (divisions - 1)
-            ratios[i2 + 1] = i / (divisions - 1)
-
-            // Index
-            indices[i6 + 0] = i2 + 2
-            indices[i6 + 1] = i2
-            indices[i6 + 2] = i2 + 1
-            indices[i6 + 3] = i2 + 1
-            indices[i6 + 4] = i2 + 3
-            indices[i6 + 5] = i2 + 2
-        }
-
-        // Attributes
-        this.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
-        this.setAttribute('direction', new THREE.Float32BufferAttribute(directions, 3))
-        this.setAttribute('ratio', new THREE.Float32BufferAttribute(ratios, 1))
-        this.setIndex(new THREE.BufferAttribute(indices, 1))
-    }
-}
+import { WindLineGeometry } from '../Geometries/WindLineGeometry.js'
 
 class WindLine
 {
@@ -146,7 +59,7 @@ export class WindLines
         this.game = Game.getInstance()
 
         this.intervalRange = { min: 300, max: 2000 }
-        this.duration = 2
+        this.duration = 4
         this.translation = 1
         this.thickness = 0.1
 
