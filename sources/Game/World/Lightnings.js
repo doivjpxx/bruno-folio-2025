@@ -10,8 +10,6 @@ export class Lightnings
     {
         this.game = Game.getInstance()
 
-        this.frequency = 2
-
         // Debug
         if(this.game.debug.active)
         {
@@ -19,29 +17,26 @@ export class Lightnings
                 title: '⚡️ Lightnings',
                 expanded: false,
             })
+        }
 
+        this.frequency = 2
+        this.hitChances = 0
+
+        // Debug
+        this.hitChancesBinding = this.game.debug.addManualBinding(
+            this.debugPanel,
+            this,
+            'hitChances',
+            { label: 'hitChances', min: 0, max: 1, step: 0.001 },
+            () =>
+            {
+                return Math.max(0, this.game.weather.clouds.value) * Math.max(0, this.game.weather.electricField.value) * this.game.weather.humidity.value
+            }
+        )
+
+        if(this.game.debug.active)
+        {
             this.debugPanel.addBinding(this, 'frequency', { min: 0.1, max: 10, step: 0.1 })
-
-            this.game.debug.addButtons(
-                this.debugPanel,
-                {
-                    start: () => { this.start() },
-                    stop: () => {this.stop()  },
-                    create: () =>
-                    {
-                        const angle = Math.random() * Math.PI * 2
-                        const position = new THREE.Vector3(
-                            this.game.vehicle.position.x + Math.cos(angle) * 2,
-                            0,
-                            this.game.vehicle.position.z + Math.sin(angle) * 2
-                        )
-                        this.create(position)
-                    },
-                },
-                'actions'
-            )
-            
-            this.debugPanel.addBlade({ view: 'separator' })
         }
 
         this.materialReference = this.game.materials.createEmissive('lightnings', '#4c8bff', 4, this.debugPanel)
@@ -367,9 +362,9 @@ export class Lightnings
     {
         const tryCreate = () =>
         {
-            const hitChances = Math.max(0, this.game.weather.clouds.value) * Math.max(0, this.game.weather.electricField.value) * this.game.weather.humidity.value
+            this.hitChancesBinding.update()
 
-            if(Math.random() < hitChances)
+            if(Math.random() < this.hitChances)
                 this.createRandom()
 
             gsap.delayedCall(1 / this.frequency, tryCreate)

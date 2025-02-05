@@ -22,19 +22,6 @@ export class DayCycles extends Cycles
         {
             this.debugPanel.addBinding(this, 'duration', { min: 1, max: 60 * 10, step: 1 })
 
-            const progresses = {
-                day: () => { this.progress = 0 },
-                dusk: () => { this.progress = 0.25 },
-                night: () => { this.progress = 0.35 },
-                dawn: () => { this.progress = 0.8 }
-            }
-
-            this.game.debug.addButtons(
-                this.debugPanel,
-                progresses,
-                'setTime'
-            )
-            
             for(const presetKey in presets)
             {
                 const preset = presets[presetKey]

@@ -12,7 +12,7 @@ export class Weather
         {
             this.debugPanel = this.game.debug.panel.addFolder({
                 title: '🌦️ Weather',
-                expanded: true,
+                expanded: false,
             })
         }
 
@@ -125,20 +125,24 @@ export class Weather
         property.manual = false
         property.min = min
         property.max = max
-        property.get = get
 
-        property.value = property.get()
+        property.value = get()
         property.manualValue = property.value
 
         // Debug
+        property.binding = this.game.debug.addManualBinding(
+            this.debugPanel,
+            property,
+            'value',
+            { label: name, min: property.min, max: property.max, step: 0.001 },
+            () =>
+            {
+                return get()
+            }
+        )
+
         if(this.game.debug.active)
         {
-            this.debugPanel
-                .addBinding(property, 'manualValue', { label: name, min: property.min, max: property.max, step: 0.001 })
-                .on('change', () =>
-                {
-                    property.manual = true
-                })
             this.debugPanel.addBinding(property, 'value', { readonly: true })
             this.debugPanel.addBinding(
                 property,
@@ -151,11 +155,6 @@ export class Weather
                     max: property.max,
                 }
             )
-            this.game.debug.addButtons(
-                this.debugPanel,
-                { auto: () => { property.manual = false } },
-                'mode'
-            )
             this.debugPanel.addBlade({ view: 'separator' })
         }
 
@@ -166,6 +165,6 @@ export class Weather
     update()
     {
         for(const property of this.properties)
-            property.value = property.manual ? property.manualValue : property.get()
+            property.binding.update()
     }
 }

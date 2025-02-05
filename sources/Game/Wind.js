@@ -9,6 +9,14 @@ export class Wind
     {
         this.game = Game.getInstance()
 
+        if(this.game.debug.active)
+        {
+            this.debugPanel = this.game.debug.panel.addFolder({
+                title: '💨 Wind',
+                expanded: false,
+            })
+        }
+
         this.angle = Math.PI * 0.6
         this.direction = uniform(vec2(
             Math.sin(this.angle),
@@ -40,13 +48,19 @@ export class Wind
         }, 2)
 
         // Debug
+        this.strengthBinding = this.game.debug.addManualBinding(
+            this.debugPanel,
+            this.strength,
+            'value',
+            { label: 'strength', min: 0, max: 1, step: 0.001 },
+            () =>
+            {
+                return remapClamp(this.game.weather.wind.value, 0, 1, 0.1, 1)
+            }
+        )
+
         if(this.game.debug.active)
         {
-            this.debugPanel = this.game.debug.panel.addFolder({
-                title: '💨 Wind',
-                expanded: false,
-            })
-
             this.debugPanel.addBinding(this.positionFrequency, 'value', { label: 'positionFrequency', min: 0, max: 1, step: 0.001 })
             this.debugPanel.addBinding(this, 'timeFrequency', { min: 0, max: 1, step: 0.001 })
             this.debugPanel
@@ -58,8 +72,7 @@ export class Wind
     update()
     {
         // Apply weather
-        const wind = remapClamp(this.game.weather.wind.value, 0, 1, 0.2, 1)
-        this.strength.value = wind
-        this.localTime.value += this.game.ticker.deltaScaled * this.timeFrequency * wind * 2
+        this.strengthBinding.update()
+        this.localTime.value += this.game.ticker.deltaScaled * this.timeFrequency * this.strength.value
     }
 }

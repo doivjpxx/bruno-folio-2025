@@ -130,6 +130,28 @@ export class Rain
         this.updateCompute = update.compute(this.count)
 
         // Debug
+        this.visibleRatioBinding = this.game.debug.addManualBinding(
+            this.debugPanel,
+            this.visibleRatio,
+            'value',
+            { label: 'visibleRatio', min: 0, max: 1, step: 0.001 },
+            () =>
+            {
+                return this.game.weather.rain.value
+            }
+        )
+
+        this.weightBinding = this.game.debug.addManualBinding(
+            this.debugPanel,
+            this.weight,
+            'value',
+            { label: 'weight', min: 0, max: 1, step: 0.001 },
+            () =>
+            {
+                return remapClamp(this.game.weather.temperature.value, 5, -5, 1, 0.1)
+            }
+        )
+
         if(this.game.debug.active)
         {
             this.debugPanel.addBinding(this.scale, 'value', { label: 'scale', min: 0, max: 0.1, step: 0.001 })
@@ -151,8 +173,8 @@ export class Rain
     update()
     {
         // Apply weather
-        this.visibleRatio.value = this.game.weather.rain.value
-        this.weight.value = remapClamp(this.game.weather.temperature.value, 5, -5, 1, 0.1)
+        this.visibleRatioBinding.update()
+        this.weightBinding.update()
 
         this.mesh.visible = this.visibleRatio.value > 0.00001
         

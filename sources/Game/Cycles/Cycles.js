@@ -9,36 +9,46 @@ export class Cycles
     {
         this.game = Game.getInstance()
 
+        if(this.game.debug.active)
+        {
+            this.debugPanel = this.game.debug.panel.addFolder({
+                title: name,
+                expanded: false,
+            })
+        }
+
         this.name = name
         this.duration = duration
         this.absoluteProgress = (new Date()).getTime() / 1000 / this.duration
+        this.newAbsoluteProgress = this.absoluteProgress
         this.progress = this.absoluteProgress % 1
         this.progressDelta = 1
-        this.manual = false
-        this.manualAbsoluteProgress = this.absoluteProgress
         this.keyframesList = []
         this.properties = []
         this.punctualEvents = []
         this.intervalEvents = []
         this.events = new Events()
 
-        if(this.game.debug.active)
-        {
-            this.debugPanel = this.game.debug.panel.addFolder({
-                title: this.name,
-                expanded: false,
-            })
-
-            this.debugPanel
-                .addBinding(this, 'manualAbsoluteProgress', { label: 'absoluteProgress', step: 0.01 })
-                .on('change', () => { this.manual = true })
-
-            this.game.debug.addButtons(
-                this.debugPanel,
-                { auto: () => { this.manual = false } },
-                'mode'
-            )
-        }
+        // Debug
+        this.newAbsoluteProgressBinding = this.game.debug.addManualBinding(
+            this.debugPanel,
+            this,
+            'newAbsoluteProgress',
+            {
+                view: 'cameraring',
+                series: 0,
+                unit: {
+                    pixels: 100,
+                    ticks: 4,
+                    value: 1,
+                    step: 0.001
+                },
+            },
+            () =>
+            {
+                return (new Date()).getTime() / 1000 / this.duration
+            }
+        )
 
         this.setKeyframes()
 
@@ -123,16 +133,9 @@ export class Cycles
     update(firstFrame = false)
     {
         // New absolute progress
-        let newAbsoluteProgress = 0
-
-        if(this.manual)
-            newAbsoluteProgress = this.manualAbsoluteProgress
-        else
-            newAbsoluteProgress = (new Date()).getTime() / 1000 / this.duration
-
-        this.progressDelta = newAbsoluteProgress - this.absoluteProgress // Delta
-
-        this.absoluteProgress = newAbsoluteProgress
+        this.newAbsoluteProgressBinding.update()
+        this.progressDelta = this.newAbsoluteProgress - this.absoluteProgress // Delta
+        this.absoluteProgress = this.newAbsoluteProgress
 
         // New progress
         const newProgress = this.absoluteProgress % 1

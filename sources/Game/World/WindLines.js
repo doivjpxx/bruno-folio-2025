@@ -59,6 +59,14 @@ export class WindLines
     {
         this.game = Game.getInstance()
 
+        if(this.game.debug.active)
+        {
+            this.debugPanel = this.game.debug.panel.addFolder({
+                title: '⌇ Wind lines',
+                expanded: false,
+            })
+        }
+
         this.intervalRange = { min: 300, max: 2000 }
         this.duration = 4
         this.translation = 1
@@ -81,14 +89,20 @@ export class WindLines
             }, this.intervalRange.min + Math.random() * (this.intervalRange.max - this.intervalRange.min))
         }
 
+        // Debug
+        this.durationBinding = this.game.debug.addManualBinding(
+            this.debugPanel,
+            this,
+            'duration',
+            { min: 0, max: 8, step: 0.001 },
+            () =>
+            {
+                return remapClamp(this.game.weather.wind.value, 0, 1, 8, 2)
+            }
+        )
 
         if(this.game.debug.active)
         {
-            this.debugPanel = this.game.debug.panel.addFolder({
-                title: '⌇ Wind lines',
-                expanded: false,
-            })
-
             this.debugPanel.addBinding(this, 'intervalRange', {
                 min: 0,
                 max: 4000,
@@ -129,7 +143,7 @@ export class WindLines
             return
 
         // Apply weather
-        this.duration = remapClamp(this.game.weather.wind.value, 0, 1, 8, 2)
+        this.durationBinding.update()
 
         // Setup
         windLine.mesh.visible = true
