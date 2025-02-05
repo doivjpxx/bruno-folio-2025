@@ -5,7 +5,7 @@ import { Events } from '../Events.js'
 
 export class Cycles
 {
-    constructor(name = 'Cycles', duration = 10)
+    constructor(name = 'Cycles', duration = 10, forcedProgress = null, manual = false)
     {
         this.game = Game.getInstance()
 
@@ -19,7 +19,7 @@ export class Cycles
 
         this.name = name
         this.duration = duration
-        this.absoluteProgress = (new Date()).getTime() / 1000 / this.duration
+        this.absoluteProgress = forcedProgress !== null ? forcedProgress : ((new Date()).getTime() / 1000 / this.duration)
         this.newAbsoluteProgress = this.absoluteProgress
         this.progress = this.absoluteProgress % 1
         this.progressDelta = 1
@@ -46,8 +46,9 @@ export class Cycles
             },
             () =>
             {
-                return (new Date()).getTime() / 1000 / this.duration
-            }
+                return forcedProgress !== null ? forcedProgress : ((new Date()).getTime() / 1000 / this.duration)
+            },
+            manual
         )
 
         this.setKeyframes()

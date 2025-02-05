@@ -5,7 +5,7 @@ export class YearCycles extends Cycles
 {
     constructor()
     {
-        super('🕜 Year Cycles', 60 * 60 * 24 * 365)
+        super('🕜 Year Cycles', 60 * 60 * 24 * 365, null, false)
     }
 
     getKeyframesDescriptions()

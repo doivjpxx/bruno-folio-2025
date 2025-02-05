@@ -26,10 +26,10 @@ export class Debug
         }
     }
 
-    addManualBinding(panel, object, property, settings, update)
+    addManualBinding(panel, object, property, settings, update, manual = false)
     {
         const binding = {}
-        binding.manual = false
+        binding.manual = manual
         binding.manualValue = object[property]
         binding.update = () =>
         {

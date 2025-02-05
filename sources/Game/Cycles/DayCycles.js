@@ -5,7 +5,7 @@ export class DayCycles extends Cycles
 {
     constructor()
     {
-        super('🕜 Day Cycles', 4 * 60)
+        super('🕜 Day Cycles', 4 * 60, null, false)
     }
 
     getKeyframesDescriptions()
