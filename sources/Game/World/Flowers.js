@@ -1,7 +1,8 @@
 import * as THREE from 'three/webgpu'
 import { Game } from '../Game.js'
-import { color, float, Fn, instance, instancedBufferAttribute, instanceIndex, luminance, mix, positionLocal, texture, uniform, uniformArray, uv, vec3, vec4 } from 'three/tsl'
+import { attribute, color, float, Fn, instance, instancedBufferAttribute, instanceIndex, luminance, mix, positionLocal, texture, uniform, uniformArray, uv, vec3, vec4 } from 'three/tsl'
 import { remap, smoothstep } from '../utilities/maths.js'
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 
 export class Flowers
 {
@@ -94,11 +95,10 @@ export class Flowers
             const colorIndex = i % this.colors.presets.length
 
             const clusterCount = 3 + Math.floor(Math.random() * 8)
+            // const clusterCount = 1
             for(let j = 0; j < clusterCount; j++)
             {
                 // Transform matrix
-                const size = remap(Math.random(), 0, 1, 0.25, 0.8)
-
                 const object = new THREE.Object3D()
                 
                 object.rotation.y = Math.PI * 2 * Math.random()
@@ -109,7 +109,9 @@ export class Flowers
                     clusterPosition.z + (Math.random() - 0.5) * 3
                 )
 
-                object.scale.setScalar(size)
+                const scale = 0.6 + Math.random() * 0.4
+                object.scale.setScalar(scale)
+                
                 object.updateMatrix()
 
                 this.transformMatrices.push(object.matrix)
@@ -123,19 +125,59 @@ export class Flowers
 
     setGeometry()
     {
-        this.geometry = new THREE.SphereGeometry(1, 4, 4, - Math.PI * 0.2, Math.PI * 0.4, Math.PI * 0.3, Math.PI * 0.4)
-        this.geometry.rotateZ(- Math.PI * 0.5)
-        this.geometry.translate(0, - 0.8, 0)
+        const count = 6
+        const planes = []
+
+        const emissiveMultiplierArray = new Float32Array(count * 4)
+
+        for(let i = 0; i < count; i++)
+        {
+            const plane = new THREE.PlaneGeometry(0.2, 0.2)
+
+            // Position
+            const spherical = new THREE.Spherical(
+                1 - Math.pow(Math.random(), 3),
+                Math.PI * 0.5 * Math.random(),
+                Math.PI * 2 * Math.random()
+            )
+            const position = new THREE.Vector3().setFromSpherical(spherical)
+
+            plane.rotateX(Math.random() * 9999)
+            plane.rotateY(Math.random() * 9999)
+            plane.rotateZ(Math.random() * 9999)
+            plane.translate(
+                position.x,
+                position.y * 0.5,
+                position.z
+            )
+
+            // Emissiveness
+            const emissiveMultiplier = 0.5 + (i / count) * 0.5
+            emissiveMultiplierArray[i * 4 + 0] = emissiveMultiplier
+            emissiveMultiplierArray[i * 4 + 1] = emissiveMultiplier
+            emissiveMultiplierArray[i * 4 + 2] = emissiveMultiplier
+            emissiveMultiplierArray[i * 4 + 3] = emissiveMultiplier
+
+            // Save
+            planes.push(plane)
+        }
+
+        // Merge all planes
+        this.geometry = mergeGeometries(planes)
+
+        // Remove unsused attributes
+        this.geometry.deleteAttribute('uv')
+
+        // Add attribute
+        this.geometry.setAttribute('emissiveMultiplier', new THREE.Float32BufferAttribute(emissiveMultiplierArray, 1))
+    
     }
 
     setMaterial()
     {
         // this.material = new THREE.MeshNormalNodeMaterial({ wireframe: false })
         // this.material = new THREE.MeshLambertNodeMaterial({ wireframe: true })
-        this.material = new THREE.MeshLambertNodeMaterial({
-            alphaMap: this.game.resources.foliateTexture,
-            alphaTest: 0.1
-        })
+        this.material = new THREE.MeshLambertNodeMaterial({ side: THREE.DoubleSide })
     
         // Received shadow position
         const shadowOffset = uniform(0.25)
@@ -158,8 +200,6 @@ export class Flowers
         // Output
         this.material.outputNode = Fn(() =>
         {
-            const foliageColor = texture(this.game.resources.foliateTexture, uv())
-
             const colorIndex = instancedBufferAttribute(this.instanceColorIndex, 'float', 1)
             colorIndex.setUsage(THREE.StaticDrawUsage)
             const baseColor = vec3(
@@ -168,20 +208,21 @@ export class Flowers
                 this.colors.uniform.element(colorIndex.mul(3).add(2))
             )
 
-            const baseLuminance = luminance(baseColor)
-
-            baseColor.addAssign(foliageColor.r.sub(0.5).mul(0.75).mul(baseLuminance))
-
             const lightOutputColor = this.game.lighting.lightOutputNodeBuilder(baseColor, totalShadows, true, false)
 
-            const emissiveColor = baseColor.div(baseLuminance).mul(foliageColor.r.pow(2)).mul(10)
-            return mix(lightOutputColor, emissiveColor, this.colors.emissiveIntensity)
+            const baseLuminance = luminance(baseColor)
+            const emissiveMultiplier = attribute('emissiveMultiplier')
+            const emissiveColor = baseColor.div(baseLuminance).mul(2)
+
+            return mix(lightOutputColor, emissiveColor, this.colors.emissiveIntensity.mul(emissiveMultiplier))
+            // return vec4(vec3(emissiveColor), 1)
         })()
     }
 
     setInstancedMesh()
     {
         this.mesh = new THREE.Mesh(this.geometry, this.material)
+        this.mesh.position.y = - 0.25
         this.mesh.castShadow = true
         this.mesh.receiveShadow = true
         this.mesh.count = this.transformMatrices.length
