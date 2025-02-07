@@ -1,6 +1,6 @@
 import * as THREE from 'three/webgpu'
 import { Game } from './Game.js'
-import { attribute, cross, dot, float, Fn, mat3, materialNormal, modelViewMatrix, normalGeometry, normalView, positionGeometry, texture, vec2, vec3, vec4 } from 'three/tsl'
+import { attribute, cross, dot, float, Fn, mat3, materialNormal, modelViewMatrix, normalGeometry, normalView, positionGeometry, texture, uniform, vec2, vec3, vec4 } from 'three/tsl'
 
 const getRotationMatrix = Fn(([u, v]) =>
 {
@@ -21,7 +21,7 @@ const getRotationMatrix = Fn(([u, v]) =>
     ).toVar();
 })
 
-export class Trail
+export class Trails
 {
     constructor()
     {
@@ -34,35 +34,29 @@ export class Trail
                 expanded: true,
             })
         }
-
-        this.position = new THREE.Vector3()
-        this.alpha = 0
         
         this.subdivisions = 32
         this.texel = 1 / this.subdivisions
         this.distanceThrottle = 0.4
-        this.lastPosition = new THREE.Vector3(Infinity, Infinity, Infinity)
+        this.emissiveMultiplier = uniform(5)
+        this.fresnelOffset = uniform(0.25)
+        this.decay = 0.2
+        this.items = []
 
-        // this.setReferenceHelper()
         this.setGradient()
-        this.setDataTexture()
         this.setGeometry()
-        this.setMaterial()
-        this.setMesh()
-
+        
         this.game.ticker.events.on('tick', () =>
         {
             this.update()
         }, 9)
-    }
 
-    setReferenceHelper()
-    {
-        this.referenceHelper = new THREE.Mesh(
-            new THREE.SphereGeometry(0.05, 32, 12, 12),
-            new THREE.MeshNormalNodeMaterial({ wireframe: true }),
-        )
-        this.reference.add(this.referenceHelper)
+        if(this.game.debug.active)
+        {
+            this.debugPanel.addBinding(this.emissiveMultiplier, 'value', { label: 'emissiveMultiplier', min: 0, max: 10, step: 0.01 })
+            this.debugPanel.addBinding(this.fresnelOffset, 'value', { label: 'fresnelOffset', min: 0, max: 1, step: 0.01 })
+            this.debugPanel.addBinding(this, 'decay', { min: 0, max: 1, step: 0.001 })
+        }
     }
 
     setGradient()
@@ -116,16 +110,6 @@ export class Trail
         }
     }
 
-    setDataTexture()
-    {
-        this.dataTexture = new THREE.DataTexture(
-            new Float32Array(this.subdivisions * 4),
-            this.subdivisions,
-            1,
-            THREE.RGBAFormat,
-            THREE.FloatType
-        )
-    }
 
     setGeometry()
     {
@@ -137,25 +121,37 @@ export class Trail
         this.geometry.deleteAttribute('uv')
     }
 
-    setMaterial()
+    create()
     {
-        this.material = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false })
+        const item = {}
+        item.lastPosition = new THREE.Vector3(Infinity, Infinity, Infinity)
+        item.position = new THREE.Vector3()
+        item.alpha = 0
 
+        item.dataTexture = new THREE.DataTexture(
+            new Float32Array(this.subdivisions * 4),
+            this.subdivisions,
+            1,
+            THREE.RGBAFormat,
+            THREE.FloatType
+        )
+
+        const material = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false })
         const customNormal = vec3().varying()
         const ratio = float(0).varying()
         const alpha = float(0).varying()
 
-        this.material.positionNode = Fn(() =>
+        material.positionNode = Fn(() =>
         {
             // Ratio
             ratio.assign(positionGeometry.z.oneMinus())
 
             // Trail data
-            const trailData = texture(this.dataTexture, vec2(ratio, 0.5)).toVar()
+            const trailData = texture(item.dataTexture, vec2(ratio, 0.5)).toVar()
             const trailPosition = trailData.xyz
 
             // Direction
-            const nextPosition = texture(this.dataTexture, vec2(ratio.add(this.texel), 0.5)).xyz
+            const nextPosition = texture(item.dataTexture, vec2(ratio.add(this.texel), 0.5)).xyz
             const direction = nextPosition.sub(trailPosition).normalize().toVar()
 
             // Rotation matrix
@@ -174,66 +170,67 @@ export class Trail
             return trailPosition.add(rotatedPoint)
         })()
 
-        this.material.outputNode = Fn(() =>
+        material.outputNode = Fn(() =>
         {
             const fresnel = customNormal.dot(vec3(0, 0, 1)).abs().oneMinus()
 
             const gradientUv = vec2(
                 0.5,
-                ratio.oneMinus().sub(fresnel.oneMinus().mul(0.25))
+                ratio.oneMinus().sub(fresnel.oneMinus().mul(this.fresnelOffset))
             )
-            const baseColor = texture(this.gradientTexture, gradientUv).rgb.mul(5)
+            const baseColor = texture(this.gradientTexture, gradientUv).rgb.mul(this.emissiveMultiplier)
             
             return vec4(vec3(baseColor), ratio.oneMinus().mul(alpha))
         })()
-    }
+        item.mesh = new THREE.Mesh(this.geometry, material)
+        item.mesh.frustumCulled = false
+        this.game.scene.add(item.mesh)
 
-    setMesh()
-    {
-        this.mesh = new THREE.Mesh(this.geometry, this.material)
-        this.mesh.frustumCulled = false
-        this.game.scene.add(this.mesh)
+        this.items.push(item)
+        
+        return item
     }
 
     update()
     {
-        const data = this.dataTexture.source.data.data
-
-        // Throttle by distance
-        const positionDelta = this.lastPosition.clone().sub(this.position)
-        const distance = positionDelta.length()
-        
-        if(distance > this.distanceThrottle)
+        for(const item of this.items)
         {
-            // Move data one "pixel"
+            const data = item.dataTexture.source.data.data
+
+            // Throttle by distance
+            const positionDelta = item.lastPosition.clone().sub(item.position)
+            const distance = positionDelta.length()
+            
+            if(distance > this.distanceThrottle)
+            {
+                // Move data one "pixel"
+                for(let i = this.subdivisions - 1; i >= 0; i--)
+                {
+                    const i4 = i * 4
+                    data[i4    ] = data[i4 - 4]
+                    data[i4 + 1] = data[i4 - 3]
+                    data[i4 + 2] = data[i4 - 2]
+                    data[i4 + 3] = data[i4 - 1]
+                }
+
+                // Save time and position
+                item.lastPosition.copy(item.position)
+            }
+
+            // Fade out
             for(let i = this.subdivisions - 1; i >= 0; i--)
             {
                 const i4 = i * 4
-                data[i4    ] = data[i4 - 4]
-                data[i4 + 1] = data[i4 - 3]
-                data[i4 + 2] = data[i4 - 2]
-                data[i4 + 3] = data[i4 - 1]
+                data[i4 + 3] = Math.max(data[i4 + 3] - this.game.ticker.deltaScaled * this.decay, 0)
             }
 
-            // Save time and position
-            this.lastTime = this.game.ticker.elapsed
-            this.lastPosition.copy(this.position)
+            // Draw new position
+            data[0] = item.position.x
+            data[1] = item.position.y
+            data[2] = item.position.z
+            data[3] = item.alpha
+
+            item.dataTexture.needsUpdate = true
         }
-
-        // Fade out
-        for(let i = this.subdivisions - 1; i >= 0; i--)
-        {
-            const i4 = i * 4
-            data[i4 + 3] = Math.max(data[i4 + 3] - this.game.ticker.deltaScaled * 0.2, 0)
-        }
-
-
-        // Draw new position
-        data[0] = this.position.x
-        data[1] = this.position.y
-        data[2] = this.position.z
-        data[3] = this.alpha
-
-        this.dataTexture.needsUpdate = true
     }
 }
