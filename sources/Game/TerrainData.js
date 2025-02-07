@@ -16,7 +16,7 @@ export class TerrainData
         {
             this.debugPanel = this.game.debug.panel.addFolder({
                 title: '🏔️ Terrain Data',
-                expanded: true,
+                expanded: false,
             })
         }
 

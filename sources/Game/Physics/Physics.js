@@ -2,7 +2,7 @@ import { Game } from '../Game.js'
 import RAPIER from '@dimforge/rapier3d-compat'
 import { PhysicsWireframe } from './PhysicsWireframe.js'
 import { remapClamp } from '../utilities/maths.js'
-import * as THREE from 'three'
+import * as THREE from 'three/webgpu'
 
 export class Physics
 {

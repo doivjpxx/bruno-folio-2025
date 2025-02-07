@@ -286,7 +286,7 @@ export class WaterSurface
 
     setMaterial()
     {
-        const material = new THREE.MeshLambertNodeMaterial({ color: '#ffffff', wireframe: false })
+        const material = new THREE.MeshLambertNodeMaterial({ color: '#ffffff', wireframe: false, depthWrite: false })
 
         const totalShadow = this.game.lighting.addTotalShadowToMaterial(material)
 

@@ -3,6 +3,7 @@ import { Game } from './Game.js'
 import { Events } from './Events.js'
 import { remapClamp } from './utilities/maths.js'
 import { Track } from './GroundData/Track.js'
+import { Trail } from './Trail.js'
 
 export class Vehicle
 {
@@ -57,6 +58,7 @@ export class Vehicle
         this.setBlinkers()
         this.setAntenna()
         this.setExplosions()
+        this.setTrails()
 
         this.game.ticker.events.on('tick', () =>
         {
@@ -540,6 +542,23 @@ export class Vehicle
         })
     }
 
+    setTrails()
+    {
+        this.leftReference = new THREE.Object3D()
+        this.leftReference.position.set(-1.28, 0.1, -0.55)
+        this.parts.chassis.add(this.leftReference)
+
+        this.leftTrail = new Trail()
+        this.leftReference.getWorldPosition(this.leftTrail.position)
+
+        this.rightReference = new THREE.Object3D()
+        this.rightReference.position.set(-1.28, 0.1, 0.55)
+        this.parts.chassis.add(this.rightReference)
+
+        this.rightTrail = new Trail()
+        this.rightReference.getWorldPosition(this.rightTrail.position)
+    }
+
     updatePrePhysics()
     {
         let reverseBrake = false
@@ -698,5 +717,12 @@ export class Vehicle
             const antennaRotationSpeed = remapClamp(antennaTargetDistance, 50, 5, 1, 10)
             this.antenna.headAxle.rotation.z += this.game.ticker.deltaScaled * antennaRotationSpeed
         }
+
+        // Trails
+        this.leftReference.getWorldPosition(this.leftTrail.position)
+        this.leftTrail.alpha = this.goingForward && this.game.inputs.keys.boost ? 1 : 0
+
+        this.rightReference.getWorldPosition(this.rightTrail.position)
+        this.rightTrail.alpha = this.leftTrail.alpha
     }
 }

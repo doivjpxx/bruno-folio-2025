@@ -1,4 +1,3 @@
-import * as THREE from 'three'
 import { color, float, mix, positionWorld, rangeFogFactor, screenCoordinate, uniform, vec2, vec3, viewportUV } from 'three/tsl'
 import { Game } from './Game.js'
 
