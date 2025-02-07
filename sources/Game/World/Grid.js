@@ -1,11 +1,10 @@
 import * as THREE from 'three/webgpu'
 import { Game } from '../Game.js'
 import MeshGridMaterial, { MeshGridMaterialLine } from '../Materials/MeshGridMaterial.js'
-import { positionWorld, uv, vec4 } from 'three/tsl'
 
-export class Floor
+export class Grid
 {
-    constructor(mode = 'grid')
+    constructor()
     {
         this.game = Game.getInstance()
 
@@ -16,68 +15,16 @@ export class Floor
         if(this.game.debug.active)
         {
             this.debugPanel = this.game.debug.panel.addFolder({
-                title: '🌐 Floor',
+                title: '🌐 Grid',
                 expanded: false,
             })
         }
 
-
-        if(mode === 'terrain')
-        {
-            this.setMesh()
-            this.setPhysicalHeightfield()
-        }
-        else if(mode === 'grid')
-        {
-            this.setGrid()
-            this.setPhysicalBox()
-        }
-        
-        // this.setKeys()
+        this.setVisual()
+        this.setPhysical()
     }
 
-    setMesh()
-    {
-        const material = new THREE.MeshLambertNodeMaterial({ color: '#000000', wireframe: false })
-
-        const terrainData = this.game.terrainData.terrainDataNode(positionWorld.xz)
-        const terrainDataGrass = terrainData.g.smoothstep(0.4, 0.6)
-        const baseColor = this.game.terrainData.colorNode(terrainData)
-
-        const totalShadow = this.game.lighting.addTotalShadowToMaterial(material).mul(terrainDataGrass.oneMinus())
-
-        material.outputNode = this.game.lighting.lightOutputNodeBuilder(baseColor.rgb, totalShadow, false, false)
-
-        this.mesh = new THREE.Mesh(this.geometry, material)
-        this.mesh.receiveShadow = true
-        // this.mesh.castShadow = true
-        this.game.scene.add(this.mesh)
-    }
-
-    setKeys()
-    {
-        // Geometry
-        const geometry = new THREE.PlaneGeometry(4, 1)
-
-        // Material
-        const material = new THREE.MeshBasicNodeMaterial({
-            alphaMap: this.game.resources.floorKeysTexture,
-            alphaTest: 0.5
-        })
-
-        // Mesh
-        this.keys = new THREE.Mesh(geometry, material)
-        // this.keys.castShadow = true
-        // this.keys.receiveShadow = true
-        this.keys.scale.setScalar(3)
-        this.keys.rotation.x = - Math.PI * 0.5
-        this.keys.rotation.z = Math.PI * 0.5
-        this.keys.position.y = 1
-        this.keys.position.x = 4
-        this.game.scene.add(this.keys)
-    }
-
-    setGrid()
+    setVisual()
     {
         const lines = [
             // new MeshGridMaterialLine(0x705df2, 1, 0.03, 0.2),
@@ -131,7 +78,7 @@ export class Floor
         }
     }
 
-    setPhysicalBox()
+    setPhysical()
     {
         this.game.entities.add({
             type: 'fixed',
@@ -139,37 +86,6 @@ export class Floor
             restitution: 0,
             colliders: [
                 { shape: 'cuboid', parameters: [ 1000, 1, 1000 ], position: { x: 0, y: - 1.01, z: 0 }, category: 'floor' },
-            ]
-        })
-    }
-
-    setPhysicalHeightfield()
-    {
-        // Extract heights from geometry
-        const positionAttribute = this.geometry.attributes.position
-        const totalCount = positionAttribute.count
-        const rowsCount = Math.sqrt(totalCount)
-        const heights = new Float32Array(totalCount)
-        const halfExtent = this.subdivision / 2
-
-        for(let i = 0; i < totalCount; i++)
-        {
-            const x = positionAttribute.array[i * 3 + 0]
-            const y = positionAttribute.array[i * 3 + 1]
-            const z = positionAttribute.array[i * 3 + 2]
-            const indexX = Math.round(((x / (halfExtent * 2)) + 0.5) * (rowsCount - 1))
-            const indexZ = Math.round(((z / (halfExtent * 2)) + 0.5) * (rowsCount - 1))
-            const index = indexZ + indexX * rowsCount
-
-            heights[index] = y
-        }
-
-        this.game.entities.add({
-            type: 'fixed',
-            friction: 0.25,
-            restitution: 0,
-            colliders: [
-                { shape: 'heightfield', parameters: [ rowsCount - 1, rowsCount - 1, heights, { x: this.subdivision, y: 1, z: this.subdivision } ], category: 'floor' }
             ]
         })
     }
