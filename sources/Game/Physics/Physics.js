@@ -45,13 +45,11 @@ export class Physics
             this.update()
         }, 2)
 
-        this.wireframe = new PhysicsWireframe()
-
         if(this.game.debug.active)
         {
             this.debugPanel = this.game.debug.panel.addFolder({
                 title: '⬇️ Physics',
-                expanded: false,
+                expanded: true,
             })
             this.debugPanel.addBinding(this.world.gravity, 'y', { min: - 20, max: 20, step: 0.01 })
         }

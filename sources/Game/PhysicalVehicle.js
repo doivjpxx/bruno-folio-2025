@@ -8,29 +8,11 @@ export class PhysicalVehicle
     constructor()
     {
         this.game = Game.getInstance()
-        
-        if(this.game.debug.active)
-        {
-            this.debugPanel = this.game.debug.panel.addFolder({
-                title: '🚗 Vehicle',
-                expanded: false,
-            })
-
-            this.chassisDebugPanel = this.debugPanel.addFolder({
-                title: '🎨 Chassis',
-                expanded: false,
-            })
-
-            this.headlightsDebugPanel = this.debugPanel.addFolder({
-                title: '💡 Headlights',
-                expanded: false,
-            })
-        }
 
         this.events = new Events()
 
         this.steeringAmplitude = 0.5
-        this.engineForceAmplitude = 700
+        this.engineForceAmplitude = 7
         this.boostMultiplier = 2
         this.maxSpeed = 5
         this.brakeAmplitude = 35
@@ -48,9 +30,31 @@ export class PhysicalVehicle
         this.speed = 0
         this.absoluteSpeed = 0
         this.suspensionsHeights = {
-            low: 0.125,
-            mid: 0.45,
-            high: 1
+            low: 0.125 + 0.5,
+            mid: 0.45 + 0.5,
+            high: 1 + 0.5
+        }
+
+        // Debug
+        if(this.game.debug.active)
+        {
+            this.debugPanel = this.game.physics.debugPanel.addFolder({
+                title: 'Vehicle',
+                expanded: true,
+            })
+
+            this.debugPanel.addBinding(this, 'steeringAmplitude', { min: 0, max: Math.PI * 0.5, step: 0.01 })
+            this.debugPanel.addBinding(this, 'engineForceAmplitude', { min: 1, max: 20, step: 1 })
+            this.debugPanel.addBinding(this, 'boostMultiplier', { min: 1, max: 5, step: 0.01 })
+            this.debugPanel.addBinding(this, 'maxSpeed', { min: 0, max: 20, step: 0.1 })
+            this.debugPanel.addBinding(this, 'brakeAmplitude', { min: 0, max: 200, step: 0.01 })
+            this.debugPanel.addBinding(this, 'idleBrake', { min: 0, max: 1, step: 0.001 })
+            this.debugPanel.addBinding(this, 'reverseBrake', { min: 0, max: 1, step: 0.001 })
+            this.debugPanel.addBinding(this, 'flipForce', { min: 0, max: 10, step: 0.01 })
+
+            this.debugPanel.addBinding(this.suspensionsHeights, 'low', { min: 0, max: 2, step: 0.01 })
+            this.debugPanel.addBinding(this.suspensionsHeights, 'mid', { min: 0, max: 2, step: 0.01 })
+            this.debugPanel.addBinding(this.suspensionsHeights, 'high', { min: 0, max: 2, step: 0.01 })
         }
 
         this.setChassis()
@@ -77,8 +81,7 @@ export class PhysicalVehicle
             type: 'dynamic',
             position: this.position,
             friction: 0.4,
-            rotation: new THREE.Quaternion().setFromAxisAngle(new THREE.Euler(0, 1, 0), - Math.PI * 0),
-            // rotation: new THREE.Quaternion().setFromAxisAngle(new THREE.Euler(0, 0, 1), - Math.PI * 0.5),
+            rotation: new THREE.Quaternion().setFromAxisAngle(new THREE.Euler(0, 1, 0), Math.PI * 0),
             colliders: [
                 { shape: 'cuboid', mass: 2.5, parameters: [ 1, 0.4, 0.85 ], position: { x: 0, y: -0.1, z: 0 }, centerOfMass: { x: 0, y: -0.5, z: 0 } }, // Main
                 { shape: 'cuboid', mass: 0, parameters: [ 0.5, 0.15, 0.65 ], position: { x: 0, y: 0.4, z: 0 } }, // Top
@@ -117,16 +120,16 @@ export class PhysicalVehicle
 
         // Settings
         this.wheels.settings = {
-            offset: { x: 0.90, y: - 0.5, z: 0.75 },
-            radius: 0.42,
+            offset: { x: 0.90, y: 0, z: 0.75 },
+            radius: 0.4,
             directionCs: { x: 0, y: -1, z: 0 },
             axleCs: { x: 0, y: 0, z: 1 },
             frictionSlip: 0.9,
             maxSuspensionForce: 100,
             maxSuspensionTravel: 2,
             sideFrictionStiffness: 3,
-            suspensionCompression: 40,
-            suspensionRelaxation: 1.88,
+            suspensionCompression: 20,
+            suspensionRelaxation: 1,
             suspensionStiffness: 40,
         }
 
@@ -167,32 +170,16 @@ export class PhysicalVehicle
         // Debug
         if(this.game.debug.active)
         {
-            const debugPanel = this.debugPanel.addFolder({
-                title: '🛞 Wheels',
-                expanded: false,
-            })
-
-            debugPanel.addBinding(this.wheels.settings, 'offset', { min: -1, max: 2, step: 0.01 }).on('change', this.wheels.updateSettings)
-            debugPanel.addBinding(this.wheels.settings, 'radius', { min: 0, max: 1, step: 0.01 }).on('change', this.wheels.updateSettings)
-            debugPanel.addBinding(this.wheels.settings, 'frictionSlip', { min: 0, max: 1, step: 0.01 }).on('change', this.wheels.updateSettings)
-            debugPanel.addBinding(this.wheels.settings, 'maxSuspensionForce', { min: 0, max: 1000, step: 1 }).on('change', this.wheels.updateSettings)
-            debugPanel.addBinding(this.wheels.settings, 'maxSuspensionTravel', { min: 0, max: 2, step: 0.01 }).on('change', this.wheels.updateSettings)
-            debugPanel.addBinding(this.wheels.settings, 'sideFrictionStiffness', { min: 0, max: 10, step: 0.01 }).on('change', this.wheels.updateSettings)
-            debugPanel.addBinding(this.wheels.settings, 'suspensionCompression', { min: 0, max: 30, step: 0.01 }).on('change', this.wheels.updateSettings)
-            debugPanel.addBinding(this.wheels.settings, 'suspensionRelaxation', { min: 0, max: 10, step: 0.01 }).on('change', this.wheels.updateSettings)
-            debugPanel.addBinding(this.wheels.settings, 'suspensionStiffness', { min: 0, max: 100, step: 0.1 }).on('change', this.wheels.updateSettings)
-            
-            debugPanel.addBinding(this.wheels, 'steeringMax', { min: 0, max: Math.PI * 0.5, step: 0.01 })
-            debugPanel.addBinding(this.wheels, 'brakeStrength', { min: 0, max: 1, step: 0.01 })
-            debugPanel.addBinding(this.wheels, 'idleBrakeStrength', { min: 0, max: 0.2, step: 0.01 })
-            debugPanel.addBinding(this.wheels, 'engineForceMax', { min: 0, max: 2000, step: 0.01 })
-            debugPanel.addBinding(this.wheels, 'engineBoostMultiplier', { min: 0, max: 5, step: 0.01 })
-            debugPanel.addBinding(this.wheels, 'maxSpeed', { min: 1, max: 40, step: 0.01 })
-            debugPanel.addBinding(this.wheels, 'maxSpeedBoost', { min: 1, max: 40, step: 0.01 })
-
-            debugPanel.addBinding(this.wheels, 'low', { min: 0, max: 2, step: 0.01 })
-            debugPanel.addBinding(this.wheels, 'mid', { min: 0, max: 2, step: 0.01 })
-            debugPanel.addBinding(this.wheels, 'high', { min: 0, max: 2, step: 0.01 })
+            this.debugPanel.addBlade({ view: 'separator' })
+            this.debugPanel.addBinding(this.wheels.settings, 'offset', { min: -1, max: 2, step: 0.01 }).on('change', this.wheels.updateSettings)
+            this.debugPanel.addBinding(this.wheels.settings, 'radius', { min: 0, max: 1, step: 0.01 }).on('change', this.wheels.updateSettings)
+            this.debugPanel.addBinding(this.wheels.settings, 'frictionSlip', { min: 0, max: 1, step: 0.01 }).on('change', this.wheels.updateSettings)
+            this.debugPanel.addBinding(this.wheels.settings, 'maxSuspensionForce', { min: 0, max: 1000, step: 1 }).on('change', this.wheels.updateSettings)
+            this.debugPanel.addBinding(this.wheels.settings, 'maxSuspensionTravel', { min: 0, max: 2, step: 0.01 }).on('change', this.wheels.updateSettings)
+            this.debugPanel.addBinding(this.wheels.settings, 'sideFrictionStiffness', { min: 0, max: 10, step: 0.01 }).on('change', this.wheels.updateSettings)
+            this.debugPanel.addBinding(this.wheels.settings, 'suspensionCompression', { min: 0, max: 30, step: 0.01 }).on('change', this.wheels.updateSettings)
+            this.debugPanel.addBinding(this.wheels.settings, 'suspensionRelaxation', { min: 0, max: 10, step: 0.01 }).on('change', this.wheels.updateSettings)
+            this.debugPanel.addBinding(this.wheels.settings, 'suspensionStiffness', { min: 0, max: 100, step: 0.1 }).on('change', this.wheels.updateSettings)
         }
     }
 
@@ -378,7 +365,7 @@ export class PhysicalVehicle
         for(let i = 0; i < 4; i++)
         {
             this.controller.setWheelBrake(i, brake)
-            this.controller.setWheelEngineForce(i, engineForce * 0.01)
+            this.controller.setWheelEngineForce(i, engineForce)
             this.controller.setWheelSuspensionRestLength(i, this.suspensionsHeights[this.game.player.suspensions[i]])
         }
         

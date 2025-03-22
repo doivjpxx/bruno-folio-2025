@@ -26,10 +26,11 @@ export class PhysicsWireframe
 
         if(this.game.debug.active)
         {
-            this.debugPanel = this.game.debug.panel.addFolder({
-                title: '⬇️ Physics Wireframe',
+            this.debugPanel = this.game.physics.debugPanel.addFolder({
+                title: 'Wireframe',
                 expanded: false,
             })
+            
             this.debugPanel.addBinding(this, 'active', { label: 'debug' }).on('change', () =>
             {
                 if(this.active)
