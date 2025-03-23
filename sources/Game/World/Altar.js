@@ -72,7 +72,6 @@ export class Altar
             noise.addAssign(baseUv.y.mul(this.beamAttenuation.add(1)))
 
             // Emissive
-            const emissiveMask = step(1, noise)
             const emissiveColor = mix(this.colorBottom.mul(this.emissiveBottom), this.colorTop.mul(this.emissiveTop), baseUv.y)
 
             // Goo
@@ -84,7 +83,7 @@ export class Altar
             const finalColor = mix(emissiveColor, gooColor, gooMask)
 
             // Discard
-            emissiveMask.greaterThan(0.5).discard()
+            noise.greaterThan(1).discard()
             
             return vec4(finalColor, 1)
         })()
