@@ -2,6 +2,7 @@ import * as THREE from 'three/webgpu'
 import { Game } from '../Game.js'
 import { lerp, remap, smoothstep } from '../utilities/maths.js'
 import { Events } from '../Events.js'
+import gsap from 'gsap'
 
 export class Cycles
 {
@@ -52,6 +53,7 @@ export class Cycles
         )
 
         this.setKeyframes()
+        this.setOverride()
 
         this.game.ticker.events.on('tick', () =>
         {
@@ -92,6 +94,7 @@ export class Cycles
             {
                 const property = {}
                 property.value = steps[0].properties[key]
+                property.overrideValue = null
 
                 if(property.value instanceof THREE.Color)
                 {
@@ -224,7 +227,41 @@ export class Cycles
                     property.value.lerpColors(stepPrevious.properties[key], stepNext.properties[key], mixRatio)
                 else if(property.type === 'number')
                     property.value = lerp(stepPrevious.properties[key], stepNext.properties[key], mixRatio)
+
+                if(this.override.strength > 0 && property.overrideValue !== null)
+                {
+                    if(property.type === 'color')
+                        property.value.lerpColors(property.value, property.overrideValue, this.override.strength)
+                    else if(property.type === 'number')
+                        property.value = lerp(property.value, property.overrideValue, this.override.strength)
+                }
             }
+        }
+    }
+
+    setOverride()
+    {
+        this.override = {}
+        this.override.strength = 0
+        
+        this.override.start = (values = {}, duration = 5) =>
+        {
+            for(const propertyKey in this.properties)
+            {
+                const property = this.properties[propertyKey]
+
+                if(typeof values[propertyKey] !== 'undefined')
+                    property.overrideValue = values[propertyKey]
+                else
+                    property.overrideValue = null
+            }
+
+            gsap.to(this.override, { strength: 1, duration, overwrite: true })
+        }
+
+        this.override.end = (duration = 5) =>
+        {
+            gsap.to(this.override, { strength: 0, duration, overwrite: true })
         }
     }
 

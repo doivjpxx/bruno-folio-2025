@@ -119,6 +119,20 @@ export class Tornado
             },
             20
         )
+
+        // Day cycles
+        this.game.dayCycles.override.start(
+            {
+                lightColor: new THREE.Color('#ff4141'),
+                lightIntensity: 1.2,
+                shadowColor: new THREE.Color('#4e009c'),
+                fogColorA: new THREE.Color('#3e53ff'),
+                fogColorB: new THREE.Color('#ff4ce4'),
+                fogNearRatio: 0,
+                fogFarRatio: 1.25
+            },
+            20
+        )
     }
 
     stop()
@@ -128,6 +142,9 @@ export class Tornado
 
         // Weather
         this.game.weather.override.end(20)
+
+        // Weather
+        this.game.dayCycles.override.end(20)
     }
 
     getPosition(progress)
