@@ -69,7 +69,7 @@ export class Game
                     [ 'bricksReferencesModel',      'bricks/bricksReferences.glb',           'gltf'    ],
                     [ 'bricksVisualModel',          'bricks/bricksVisual.glb',               'gltf'    ],
                     [ 'terrainTexture',             'terrain/terrain.png',                   'texture' ],
-                    [ 'terrainTexture',             'terrain/flatGrass.png',                 'texture' ],
+                    // [ 'terrainTexture',             'terrain/flatGrass.png',                 'texture' ],
                     [ 'terrainModel',               'terrain/terrain.glb',                   'gltf'    ],
                     [ 'birchTreesVisualModel',      'birchTrees/birchTreesVisual.glb',       'gltf'    ],
                     [ 'birchTreesReferencesModel',  'birchTrees/birchTreesReferences.glb',   'gltf'    ],
@@ -170,7 +170,7 @@ export class Game
             this.player = new Player()
             this.world = new World()
             this.overlay = new Overlay()
-            // this.monitoring = new Monitoring()
+            this.monitoring = new Monitoring()
 
             this.rendering.renderer.setAnimationLoop((elapsedTime) => { this.ticker.update(elapsedTime) })
         })

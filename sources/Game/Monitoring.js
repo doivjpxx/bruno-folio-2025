@@ -14,8 +14,8 @@ export class Monitoring
         // Stats
         this.stats = new Stats({
             trackGPU: true,
-            trackHz: false,
-            trackCPT: false,
+            trackHz: true,
+            trackCPT: true,
             logsPerSecond: 4,
             graphsPerSecond: 30,
             samplesLog: 40, 
@@ -32,6 +32,7 @@ export class Monitoring
         // Update
         this.game.ticker.events.on('tick', () =>
         {
+            this.game.rendering.renderer.resolveTimestampsAsync()
             this.stats.update()
         }, 999)
     }

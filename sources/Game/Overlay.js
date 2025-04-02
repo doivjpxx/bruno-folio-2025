@@ -10,7 +10,7 @@ export class Overlay
         this.game = Game.getInstance()
 
         // Uniforms
-        const baseColor = uniform(color('#2f212d'))
+        const baseColor = uniform(color('#231a21'))
         this.progress = uniform(0)
         this.patternSize = uniform(200)
         this.strokeSize = uniform(10)
