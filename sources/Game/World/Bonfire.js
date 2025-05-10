@@ -111,7 +111,7 @@ export class Bonfire
             const baseUv = uv().toVar()
 
             const baseColor = color('#6F6A87')
-            const lightOutput = this.game.lighting.lightOutputNodeBuilder(baseColor, vec3(0, 1, 0), totalShadows, true, false)
+            const lightOutput = this.game.lighting.lightOutputNodeBuilder(baseColor, float(1), vec3(0, 1, 0), totalShadows, true, false)
 
             const distanceToCenter = baseUv.sub(0.5).length()
 

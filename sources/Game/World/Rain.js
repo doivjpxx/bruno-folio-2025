@@ -63,7 +63,7 @@ export class Rain
         const scaleBuffer = storage(new THREE.StorageInstancedBufferAttribute(scaleArray, 1), 'float', this.count).toAttribute()
         
         // Output color
-        this.material.outputNode = this.game.lighting.lightOutputNodeBuilder(color('#ffffff'), vec3(1, 1, 1), this.game.lighting.addTotalShadowToMaterial(this.material))
+        this.material.outputNode = this.game.lighting.lightOutputNodeBuilder(color('#ffffff'), float(1), vec3(1, 1, 1), this.game.lighting.addTotalShadowToMaterial(this.material))
 
         // Position
         this.material.positionNode = Fn(() =>

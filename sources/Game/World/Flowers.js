@@ -205,7 +205,7 @@ export class Flowers
             const mixedColor = mix(baseColor, this.game.terrainData.grassColorUniform, colorMixer)
 
             // Light
-            return this.game.lighting.lightOutputNodeBuilder(mixedColor, normalWorld, totalShadows, true, false)
+            return this.game.lighting.lightOutputNodeBuilder(mixedColor, float(1), normalWorld, totalShadows, true, false)
         })()
     }
 

@@ -345,7 +345,7 @@ export class Snow
 
         this.material.outputNode = Fn(() =>
         {
-            const lightOutput = this.game.lighting.lightOutputNodeBuilder(this.color, computeNormal, totalShadow, false, false).rgb
+            const lightOutput = this.game.lighting.lightOutputNodeBuilder(this.color, float(1), computeNormal, totalShadow, false, false).rgb
             const alpha = deltaY.smoothstep(this.fadeEdgeLow, this.fadeEdgeHigh)
 
             // Twinkle

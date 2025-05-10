@@ -104,7 +104,7 @@ export class Foliage
         // Output
         const uniformColor = uniform(this.color)
 
-        this.material.outputNode = this.game.lighting.lightOutputNodeBuilder(uniformColor, normalWorld, totalShadows)
+        this.material.outputNode = this.game.lighting.lightOutputNodeBuilder(uniformColor, float(1), normalWorld, totalShadows)
     }
 
     setFromReferences()

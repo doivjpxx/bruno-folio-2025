@@ -1,7 +1,7 @@
 import * as THREE from 'three/webgpu'
 import { Game } from '../Game.js'
 import MeshGridMaterial, { MeshGridMaterialLine } from '../Materials/MeshGridMaterial.js'
-import { Fn, materialNormal, min, normalWorld, positionLocal, positionWorld, uv, vec3, vec4 } from 'three/tsl'
+import { float, Fn, materialNormal, min, normalWorld, positionLocal, positionWorld, uv, vec3, vec4 } from 'three/tsl'
 
 export class Field
 {
@@ -58,7 +58,7 @@ export class Field
 
         // Output
         const totalShadow = this.game.lighting.addTotalShadowToMaterial(material).mul(terrainDataGrass.oneMinus())
-        material.outputNode = this.game.lighting.lightOutputNodeBuilder(baseColor.rgb, material.normalNode, totalShadow, false, false)
+        material.outputNode = this.game.lighting.lightOutputNodeBuilder(baseColor.rgb, float(1), material.normalNode, totalShadow, false, false)
         // material.outputNode = vec4(1, 1, 1, 1)
 
         // Mesh

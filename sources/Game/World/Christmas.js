@@ -81,7 +81,7 @@ export class Christmas
         {
             const baseColor = attribute('color')
 
-            const lightOutputColor = this.game.lighting.lightOutputNodeBuilder(baseColor, normalWorld, totalShadows, false, false)
+            const lightOutputColor = this.game.lighting.lightOutputNodeBuilder(baseColor, float(1), normalWorld, totalShadows, false, false)
 
             const emissiveColor = baseColor.div(luminance(baseColor)).mul(2)
             return mix(lightOutputColor, emissiveColor, this.emissiveIntensity)

@@ -101,9 +101,9 @@ export class Lighting
         }
 
         // Light output
-        this.lightOutputNodeBuilder = (inputColor, normal, totalShadows, withBounce = true, withWater = true) =>
+        this.lightOutputNodeBuilder = (inputColor, alpha, normal, totalShadows, withBounce = true, withWater = true) =>
         {
-            return Fn(([inputColor, totalShadows]) =>
+            return Fn(([inputColor, alpha, totalShadows]) =>
             {
                 const baseColor = inputColor.toVar()
                 // baseColor.assign(vec3(0.8))
@@ -152,8 +152,8 @@ export class Lighting
                 // Fog
                 const foggedColor = this.game.fog.strength.mix(shadedColor, this.game.fog.color)
 
-                return vec4(foggedColor.rgb, 1)
-            })([inputColor, totalShadows])
+                return vec4(foggedColor.rgb, alpha)
+            })([inputColor, alpha, totalShadows])
         }
 
         // Debug

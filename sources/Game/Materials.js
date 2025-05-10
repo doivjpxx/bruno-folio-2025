@@ -158,7 +158,7 @@ export class Materials
         const colorA = uniform(new THREE.Color(_colorA))
         const colorB = uniform(new THREE.Color(_colorB))
         const baseColor = mix(colorA, colorB, uv().y)
-        material.outputNode = this.game.lighting.lightOutputNodeBuilder(baseColor, normalWorld, this.game.lighting.addTotalShadowToMaterial(material))
+        material.outputNode = this.game.lighting.lightOutputNodeBuilder(baseColor, float(1), normalWorld, this.game.lighting.addTotalShadowToMaterial(material))
         
         this.save(_name, material)
 
@@ -267,7 +267,33 @@ export class Materials
         {
             // Shadow
             // material.shadowSide = THREE.BackSide
-            material.outputNode = this.game.lighting.lightOutputNodeBuilder(baseMaterial.color, normalWorld, this.game.lighting.addTotalShadowToMaterial(material))
+
+            // Color
+            let baseColor = null
+            
+            if(baseMaterial.map)
+                baseColor = texture(baseMaterial.map)
+            else
+                baseColor = baseMaterial.color
+            
+            // Alpha
+            let alpha = null
+            
+            if(baseMaterial.alphaMap)
+                alpha = texture(baseMaterial.alphaMap)
+            else
+                alpha = float(baseMaterial.opacity)
+
+            // Exceptions
+            if(baseMaterial.name === 'projectsLabels')
+            {
+                material.premultipliedAlpha = true
+                material.transparent = true
+                alpha = texture(baseMaterial.map).r
+            }
+
+            // Output
+            material.outputNode = this.game.lighting.lightOutputNodeBuilder(baseColor, alpha, normalWorld, this.game.lighting.addTotalShadowToMaterial(material))
         }
 
         return material
@@ -275,7 +301,7 @@ export class Materials
 
     copy(baseMaterial, targetMaterial)
     {
-        const properties = [ 'color' ]
+        const properties = [ 'name', 'color', 'transparent' ]
 
         for(const property of properties)
         {

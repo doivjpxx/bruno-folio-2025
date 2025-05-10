@@ -45,7 +45,7 @@ class WindLine
             return cameraProjectionMatrix.mul(viewPosition)
         })()
 
-        material.outputNode = this.game.lighting.lightOutputNodeBuilder(color('#ffffff'), vec3(0, 1, 0), this.game.lighting.addTotalShadowToMaterial(material))
+        material.outputNode = this.game.lighting.lightOutputNodeBuilder(color('#ffffff'), float(1), vec3(0, 1, 0), this.game.lighting.addTotalShadowToMaterial(material))
 
         this.mesh = new THREE.Mesh(geometry, material)
         this.mesh.position.y = 2

@@ -86,7 +86,7 @@ export class CookieStand
             const baseColor = texture(this.game.resources.cookieBannerTexture)
             baseColor.mulAssign(windStrength.mul(4).add(1))
 
-            return this.game.lighting.lightOutputNodeBuilder(baseColor, normalWorld, totalShadows, true, false)
+            return this.game.lighting.lightOutputNodeBuilder(baseColor, float(1), normalWorld, totalShadows, true, false)
         })()
 
         this.banner.material = material
@@ -327,7 +327,7 @@ export class CookieStand
         
             const totalShadows = this.game.lighting.addTotalShadowToMaterial(material)
 
-            material.outputNode = this.game.lighting.lightOutputNodeBuilder(color('#ffffff'), normalWorld, totalShadows)
+            material.outputNode = this.game.lighting.lightOutputNodeBuilder(color('#ffffff'), float(1), normalWorld, totalShadows)
 
             // Mesh
             const mesh = new THREE.Mesh(geometry, material)
