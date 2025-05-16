@@ -4,7 +4,7 @@ import { InteractiveAreas } from '../InteractiveAreas.js'
 import gsap from 'gsap'
 import projects from '../../data/projects.js'
 import { TextWrapper } from '../TextWrapper.js'
-import { color, float, Fn, mix, normalWorld, texture, uniform, vec4 } from 'three/tsl'
+import { color, float, Fn, If, mix, normalWorld, step, texture, uniform, uv, vec4 } from 'three/tsl'
 
 export class Projects
 {
@@ -54,6 +54,10 @@ export class Projects
             this.debugPanel.addButton({ title: 'open', label: 'open' }).on('click', () => { this.open() })
             this.debugPanel.addButton({ title: 'close', label: 'close' }).on('click', () => { this.close() })
         }
+
+        // this.game.ticker.events.on('tick', () =>
+        // {
+        // })
     }
 
     setInteractiveArea()
@@ -127,12 +131,12 @@ export class Projects
         this.shadeMix = {}
 
         this.shadeMix.images = {}
-        this.shadeMix.images.min = 0
-        this.shadeMix.images.max = 0.6
+        this.shadeMix.images.min = 0.1
+        this.shadeMix.images.max = 0.5
         this.shadeMix.images.uniform = uniform(this.shadeMix.images.min)
 
         this.shadeMix.texts = {}
-        this.shadeMix.texts.min = 0
+        this.shadeMix.texts.min = 0.1
         this.shadeMix.texts.max = 0.3
         this.shadeMix.texts.uniform = uniform(this.shadeMix.texts.min)
     }
@@ -225,27 +229,122 @@ export class Projects
         this.images.mesh = this.parameters.images
         this.images.mesh.receiveShadow = true
 
-        // Texture (based on dummy image first)
+        // Sources
+        this.images.resources = new Map()
+
+        // Textures (based on dummy image first)
         const dummyImage = new Image()
         dummyImage.with = 1920
         dummyImage.height = 1080
-        this.images.texture = new THREE.Texture(dummyImage)
-        this.images.texture.colorSpace = THREE.SRGBColorSpace
-        this.images.texture.flipY = false
+
+        this.images.textureA = new THREE.Texture(dummyImage)
+        this.images.textureA.colorSpace = THREE.SRGBColorSpace
+        this.images.textureA.flipY = false
+        
+        this.images.textureB = new THREE.Texture(dummyImage)
+        this.images.textureB.colorSpace = THREE.SRGBColorSpace
+        this.images.textureB.flipY = false
+
+        this.images.texturePingPong = true
         
         // Material
         this.images.material = new THREE.MeshLambertNodeMaterial()
+        this.images.animationProgress = uniform(0)
+        this.images.animationPingPong = uniform(0)
+        this.images.animationDirection = uniform(0)
 
         const totalShadows = this.game.lighting.addTotalShadowToMaterial(this.images.material)
 
         this.images.material.outputNode = Fn(() =>
         {
-            const textureColor = texture(this.images.texture).rgb
+            const progress = this.images.animationProgress.toVar()
+
+            If(this.images.animationPingPong.greaterThan(0.5), () =>
+            {
+                progress.assign(progress.oneMinus())
+            })
+
+            const parallaxUv = uv().toVar()
+            parallaxUv.x.addAssign(progress.oneMinus().mul(-0.5))
+            const textureAColor = texture(this.images.textureA, parallaxUv).rgb
+            const textureBColor = texture(this.images.textureB, parallaxUv).rgb
+
+            const uvX = uv().x.toVar()
+            If(this.images.animationPingPong.lessThan(0.5), () =>
+            {
+                uvX.assign(uvX.oneMinus())
+            })
+            If(this.images.animationDirection.lessThan(0.5), () =>
+            {
+                uvX.assign(uvX.oneMinus())
+            })
+            const threshold = step(this.images.animationProgress, uvX)
+
+            const textureColor = mix(textureBColor, textureAColor, threshold)
+
             const shadedOutput = this.game.lighting.lightOutputNodeBuilder(textureColor, float(1), normalWorld, totalShadows)
             return vec4(mix(shadedOutput.rgb, textureColor, this.shadeMix.images.uniform), 1)
         })()
 
         this.images.mesh.material = this.images.material
+
+        // Update
+        this.images.update = (direction) =>
+        {
+            const key = this.currentProject.images[this.imageIndex]
+            const path = `projects/images/${key}`
+
+            // Try to retrieve resource
+            let resource = this.images.resources.get(key)
+
+            // Resource not found => Create
+            if(!resource)
+            {
+                resource = {}
+                resource.image = new Image(1920, 1080)
+
+                // Image loaded
+                resource.image.onload = () =>
+                {
+                    // Create source
+                    resource.source = new THREE.Source(resource.image)
+
+                    // Is still the current one
+                    if(this.currentProject.images[this.imageIndex] === key)
+                    {
+                        // Update texture
+                        const activeTexture = this.images.texturePingPong ? this.images.textureA : this.images.textureB
+                        activeTexture.source = resource.source
+                        activeTexture.needsUpdate = true
+                    }
+                }
+
+                // Start loading
+                resource.image.src = path
+
+                // Save
+                this.images.resources.set(key, resource)
+            }
+
+            // Retrieved resource
+            else
+            {
+                // Already loaded
+                if(resource.source)
+                {
+                    // Update texture
+                    const activeTexture = this.images.texturePingPong ? this.images.textureB : this.images.textureA
+                    activeTexture.source = resource.source
+                    activeTexture.needsUpdate = true
+                }
+            }
+
+            // Animate right away
+            gsap.to(this.images.animationProgress, { value: this.images.texturePingPong ? 1 : 0, duration: 1, ease: 'power2.inOut', overwrite: true })
+            this.images.texturePingPong = !this.images.texturePingPong
+            this.images.animationPingPong.value = this.images.texturePingPong ? 1 : 0
+            this.images.animationDirection.value = direction === Projects.DIRECTION_NEXT ? 1 : 0
+        }
     }
 
     setPagination()
@@ -464,7 +563,7 @@ export class Projects
 
             this.url.status = 'hiding'
 
-            const rotationDirection = direction === Projects.DIRECTION_NEXT ? 1 : - 1
+            const rotationDirection = direction === Projects.DIRECTION_NEXT ? - 1 : 1
 
             this.url.inner.rotation.x = 0
             gsap.to(this.url.inner.rotation, { x: Math.PI * rotationDirection, duration: 1, delay: 0.3, ease: 'power2.in', overwrite: true, onComplete: () =>
@@ -507,7 +606,7 @@ export class Projects
 
             this.title.status = 'hiding'
 
-            const rotationDirection = direction === Projects.DIRECTION_NEXT ? 1 : - 1
+            const rotationDirection = direction === Projects.DIRECTION_NEXT ? - 1 : 1
 
             this.title.inner.rotation.x = 0
             gsap.to(this.title.inner.rotation, { x: Math.PI * rotationDirection, duration: 1, delay: 0, ease: 'power2.in', overwrite: true, onComplete: () =>
@@ -568,7 +667,6 @@ export class Projects
 
                 let i = 0
                 const positions = this.distinctions.positions[this.currentProject.distinctions.length - 1]
-                console.log(positions)
                 for(const name of this.currentProject.distinctions)
                 {
                     const item = this.distinctions.items[name]
@@ -683,17 +781,8 @@ export class Projects
     {
         this.imageIndex = imageIndex
 
-        const path = `projects/images/${this.currentProject.images[this.imageIndex]}`
-        const image = new Image(1920, 1080)
-        image.onload = () =>
-        {
-            const source = new THREE.Source(image)
-            this.images.texture.source = source
-            this.images.texture.needsUpdate = true
-        }
-        image.src = path
-
-        // Pagination
+        // Update components
+        this.images.update(direction)
         this.pagination.update()
     }
 }
