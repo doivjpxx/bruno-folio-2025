@@ -225,6 +225,8 @@ export class Projects
     {
         this.images = {}
 
+        this.images.direction = Projects.DIRECTION_NEXT
+
         // Mesh
         this.images.mesh = this.parameters.images
         this.images.mesh.receiveShadow = true
@@ -291,10 +293,56 @@ export class Projects
 
         this.images.mesh.material = this.images.material
 
-        // Update
-        this.images.update = (direction) =>
+        // Load ended
+        this.images.loadEnded = (key) =>
         {
-            const key = this.currentProject.images[this.imageIndex]
+            // Current image => Reveal
+            if(this.currentProject.images[this.imageIndex] === key)
+            {
+                this.images.textureNew.needsUpdate = true
+                gsap.to(this.images.loadProgress, { value: 1, duration: 1, overwrite: true })
+
+                this.images.loadSibling()
+            }
+        }
+
+        // Load sibling
+        this.images.loadSibling = () =>
+        {
+            let projectIndex = this.index
+            let imageIndex = this.imageIndex
+
+            if(this.images.direction === Projects.DIRECTION_PREVIOUS)
+                imageIndex -= 1
+            else
+                imageIndex += 1
+
+            if(imageIndex < 0)
+            {
+                projectIndex -= 1
+
+                if(projectIndex < 0)
+                    projectIndex = projects.length - 1
+
+                imageIndex = projects[projectIndex].images.length - 1
+            }
+            else if(imageIndex > this.currentProject.images.length - 1)
+            {
+                projectIndex += 1
+
+                if(projectIndex > projects.length - 1)
+                    projectIndex = 0
+
+                imageIndex = 0
+            }
+
+            const key = projects[projectIndex].images[imageIndex]
+            const resource = this.images.getResourceAndLoad(key)
+        }
+
+        // Get resource and load
+        this.images.getResourceAndLoad = (key) =>
+        {
             const path = `projects/images/${key}`
 
             // Try to retrieve resource
@@ -318,29 +366,38 @@ export class Projects
                 resource.image.onload = () =>
                 {
                     resource.loaded = true
-
-                    if(this.currentProject.images[this.imageIndex] === key)
-                    {
-                        this.images.textureNew.needsUpdate = true
-                        gsap.to(this.images.loadProgress, { value: 1, duration: 1, overwrite: true })
-                    }
+                    
+                    this.images.loadEnded(key)
                 }
 
                 // Start loading
                 resource.image.src = path
 
-                // Reset load progress
-                this.images.loadProgress.value = 0
-
                 // Save
                 this.images.resources.set(key, resource)
             }
 
-            // Resource already exist
+
+            return resource
+        }
+
+        // Update
+        this.images.update = (direction) =>
+        {
+            this.images.direction = direction
+
+            // Get resource
+            const key = this.currentProject.images[this.imageIndex]
+            const resource = this.images.getResourceAndLoad(key)
+
+            if(resource.loaded)
+            {
+                this.images.loadSibling()
+                this.images.loadProgress.value = 1
+            }
             else
             {
-                if(resource.loaded)
-                    this.images.loadProgress.value = 1
+                this.images.loadProgress.value = 0
             }
 
             // Update textures
