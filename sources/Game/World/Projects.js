@@ -577,7 +577,7 @@ export class Projects
             ],
             onClick: () =>
             {
-                this.previousProject()
+                this.previousProject(true)
             }
         })
 
@@ -968,7 +968,7 @@ export class Projects
         if(this.images.index > 0)
             this.previousImage()
         else
-            this.previousProject()
+            this.previousProject(false)
     }
 
     previousImage()
@@ -981,12 +981,12 @@ export class Projects
         this.board.active = false
     }
 
-    previousProject()
+    previousProject(firstImage = false)
     {
         if(this.state === Projects.STATE_CLOSED || this.state === Projects.STATE_CLOSING)
             return
 
-        this.changeProject(this.projects.index - 1, Projects.DIRECTION_PREVIOUS)
+        this.changeProject(this.projects.index - 1, Projects.DIRECTION_PREVIOUS, firstImage)
 
         this.board.active = false
     }
@@ -1019,7 +1019,7 @@ export class Projects
         this.board.active = false
     }
 
-    changeProject(index = 0, direction = Projects.DIRECTION_NEXT, forcedImageIndex = null)
+    changeProject(index = 0, direction = Projects.DIRECTION_NEXT, firstImage = false)
     {
         // Loop index
         let loopIndex = index
@@ -1043,7 +1043,12 @@ export class Projects
         this.distinctions.update()
 
         // Change image
-        const imageIndex = forcedImageIndex ?? (direction === Projects.DIRECTION_NEXT ? 0 : this.projects.current.images.length - 1)
+        let imageIndex = null
+        if(firstImage)
+            imageIndex = 0
+        else
+            imageIndex = direction === Projects.DIRECTION_NEXT ? 0 : this.projects.current.images.length - 1
+
         this.changeImage(imageIndex, direction)
     }
 
