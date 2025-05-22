@@ -2,7 +2,7 @@ export default [
     {
         title: 'Three.js Journey',
         titleSmall: [ 'Three.js', 'Journey' ],
-        url: 'threejs-journey.com',
+        url: 'https://threejs-journey.com',
         attributes:
         {
             role: [ 'developer', 'formater' ],
@@ -21,7 +21,7 @@ export default [
     {
         title: 'Chartogne Taillet',
         titleSmall: [ 'Chartogne', 'Taillet' ],
-        url: 'chartogne-taillet.com',
+        url: 'https://chartogne-taillet.com',
         attributes:
         {
             at: 'Immersive Garden',
@@ -39,7 +39,7 @@ export default [
     {
         title: 'Bonhomme | 10 ans',
         titleSmall: [ 'Bonhomme', '10 ans' ],
-        url: 'anniversary.bonhommeparis.com',
+        url: 'https://anniversary.bonhommeparis.com',
         attributes:
         {
             role: 'WebGL developer',
@@ -56,7 +56,7 @@ export default [
     {
         title: 'Madbox',
         titleSmall: [ 'Madbox' ],
-        url: 'madbox.io',
+        url: 'https://madbox.io',
         attributes:
         {
             role: 'WebGL developer',
@@ -74,7 +74,7 @@ export default [
     {
         title: 'Luni',
         titleSmall: [ 'Luni' ],
-        url: 'www.luni.app',
+        url: 'https://www.luni.app',
         attributes:
         {
             role: 'WebGL developer',
@@ -93,7 +93,7 @@ export default [
     {
         title: 'Scout',
         titleSmall: [ 'Scout' ],
-        url: 'scout-omega.vercel.app',
+        url: 'https://scout-omega.vercel.app',
         attributes:
         {
             role: 'WebGL developer',
@@ -110,7 +110,7 @@ export default [
     {
         title: 'Prior Holdings',
         titleSmall: [ 'Prio', 'Holdings' ],
-        url: 'prior.co.jp/discover/en',
+        url: 'https://prior.co.jp/discover/en',
         attributes:
         {
             role: [ 'Front developer', 'WebGL developer' ],
@@ -127,7 +127,7 @@ export default [
     {
         title: 'Orano',
         titleSmall:  'Orano',
-        url: 'orano.imm-g-prod.com/experience/innovation',
+        url: 'https://orano.imm-g-prod.com/experience/innovation',
         attributes:
         {
             role: [ 'Front developer', 'WebGL developer' ],
@@ -144,7 +144,7 @@ export default [
     {
         title: 'Citrix / Redbull',
         titleSmall: ['Citrix', 'Redbull'],
-        url: 'thenewmobileworkforce.imm-g-prod.com',
+        url: 'https://thenewmobileworkforce.imm-g-prod.com',
         attributes:
         {
             role: [ 'WebGL developer' ],

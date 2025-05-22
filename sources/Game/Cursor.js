@@ -59,6 +59,8 @@ export class Cursor
                             isIntersecting = this.raycaster.ray.intersectsBox(shape)
                         if(shape instanceof THREE.Plane)
                             isIntersecting = this.raycaster.ray.intersectsPlane(shape)
+                        if(shape instanceof THREE.Mesh)
+                            isIntersecting = this.raycaster.intersectObject(shape).length
                         
                         shapeIndex++
                     }

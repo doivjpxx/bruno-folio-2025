@@ -1,6 +1,6 @@
 import * as THREE from 'three/webgpu'
 
-export class TextWrapper
+export class TextCanvas
 {
     constructor(fontFamily = 'Comic Sans', fontWeight = '400', fontSize = 10, width = null, height = null, density = 1, horizontalAlign = 'center', lineHeight = 1)
     {

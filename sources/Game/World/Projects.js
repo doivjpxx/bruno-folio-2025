@@ -3,7 +3,7 @@ import { Game } from '../Game.js'
 import { InteractiveAreas } from '../InteractiveAreas.js'
 import gsap from 'gsap'
 import projects from '../../data/projects.js'
-import { TextWrapper } from '../TextWrapper.js'
+import { TextCanvas } from '../TextCanvas.js'
 import { add, color, float, Fn, If, mix, mul, normalWorld, positionGeometry, sin, step, texture, uniform, uv, vec4 } from 'three/tsl'
 
 export class Projects
@@ -11,7 +11,7 @@ export class Projects
     static DIRECTION_PREVIOUS = 1
     static DIRECTION_NEXT = 2
     static STATE_OPEN = 3
-    static STATE_OPENENING = 4
+    static STATE_OPENING = 4
     static STATE_CLOSED = 5
     static STATE_CLOSING = 6
 
@@ -36,6 +36,7 @@ export class Projects
         this.setCinematic()
         this.setShadeMix()
         this.setTexts()
+        this.setHover()
         this.setProjects()
         this.setImages()
         this.setPagination()
@@ -57,17 +58,6 @@ export class Projects
             this.debugPanel.addButton({ title: 'open', label: 'open' }).on('click', () => { this.open() })
             this.debugPanel.addButton({ title: 'close', label: 'close' }).on('click', () => { this.close() })
         }
-    }
-
-    setProjects()
-    {
-        this.projects = {}
-        this.projects.index = 0
-        this.projects.current = null
-        this.projects.next = null
-        this.projects.previous = null
-        this.projects.current = null
-        this.projects.items = projects
     }
 
     setInteractiveArea()
@@ -150,7 +140,7 @@ export class Projects
 
         this.shadeMix.images = {}
         this.shadeMix.images.min = 0.1
-        this.shadeMix.images.max = 0.5
+        this.shadeMix.images.max = 0.65
         this.shadeMix.images.uniform = uniform(this.shadeMix.images.min)
 
         this.shadeMix.texts = {}
@@ -183,13 +173,47 @@ export class Projects
                     this.texts.baseColor,
                     this.shadeMix.texts.uniform
                 ),
-            alpha)
+                alpha
+            )
 
             // Mesh
             mesh.castShadow = false
             mesh.receiveShadow = false
             mesh.material = material
         }
+    }
+
+    setHover()
+    {
+        this.hover = {}
+        this.hover.baseColor = color('#ffffff')
+
+        // Default
+        this.hover.inactiveMaterial = new THREE.MeshLambertNodeMaterial({ transparent: true })
+        const shadedOutput = this.game.lighting.lightOutputNodeBuilder(this.hover.baseColor, float(1), normalWorld, float(1)).rgb
+        this.hover.inactiveMaterial.outputNode = vec4(
+            mix(
+                shadedOutput,
+                this.hover.baseColor,
+                this.shadeMix.texts.uniform
+            ),
+            float(1)
+        )
+
+        // Active
+        this.hover.activeMaterial = new THREE.MeshLambertNodeMaterial({ transparent: true })
+        this.hover.activeMaterial.outputNode = vec4(this.hover.baseColor.mul(1.5), float(1))
+    }
+
+    setProjects()
+    {
+        this.projects = {}
+        this.projects.index = 0
+        this.projects.current = null
+        this.projects.next = null
+        this.projects.previous = null
+        this.projects.current = null
+        this.projects.items = projects
     }
 
     setImages()
@@ -271,34 +295,6 @@ export class Projects
         })()
 
         this.images.mesh.material = this.images.material
-
-        // Adjacents
-        const intersectPrevious = this.references.get('intersectPreviousImage')[0]
-        this.images.previousIntersect = this.game.cursor.addIntersects({
-            active: false,
-            shapes:
-            [
-                new THREE.Sphere(intersectPrevious.position, intersectPrevious.scale.x)
-            ],
-            onClick: () =>
-            {
-                this.previous()
-            }
-        })
-
-        const intersectNext = this.references.get('intersectNextImage')[0]
-        this.images.nextIntersect = this.game.cursor.addIntersects({
-            active: false,
-            shapes:
-            [
-                new THREE.Sphere(intersectNext.position, intersectNext.scale.x)
-            ],
-            onClick: () =>
-            {
-                this.next()
-            }
-        })
-
 
         // Load ended
         this.images.loadEnded = (key) =>
@@ -428,6 +424,7 @@ export class Projects
         this.pagination.group = this.references.get('pagination')[0].children[0]
         this.pagination.items = []
 
+        // List
         let i = 0
         const intersectPagination = this.references.get('intersectPagination')
 
@@ -440,10 +437,13 @@ export class Projects
                 item.index = i
                 item.visible = false
                 
+                // Mesh
                 item.mesh = child
                 item.mesh.position.x = this.pagination.inter * i    
                 item.mesh.visible = false
+                item.mesh.material = this.hover.inactiveMaterial
 
+                // Intersect
                 item.intersectReference = intersectPagination[i]
 
                 item.intersect = this.game.cursor.addIntersects({
@@ -455,6 +455,14 @@ export class Projects
                     onClick: () =>
                     {
                         this.changeImage(item.index)
+                    },
+                    onEnter: () =>
+                    {
+                        item.mesh.material = this.hover.activeMaterial
+                    },
+                    onLeave: () =>
+                    {
+                        item.mesh.material = this.hover.inactiveMaterial
                     }
                 }),
                 item.intersectReference.getWorldPosition(item.intersect.shapes[0].center)
@@ -465,6 +473,56 @@ export class Projects
             }
         }
 
+
+        // Adjacents
+        const intersectPrevious = this.references.get('intersectPreviousImage')[0]
+        const arrowPrevious = this.references.get('arrowPreviousImage')[0]
+        arrowPrevious.material = this.hover.inactiveMaterial
+ 
+        this.pagination.previousIntersect = this.game.cursor.addIntersects({
+            active: false,
+            shapes:
+            [
+                new THREE.Sphere(intersectPrevious.position, intersectPrevious.scale.x)
+            ],
+            onClick: () =>
+            {
+                this.previous()
+            },
+            onEnter: () =>
+            {
+                arrowPrevious.material = this.hover.activeMaterial
+            },
+            onLeave: () =>
+            {
+                arrowPrevious.material = this.hover.inactiveMaterial
+            }
+        })
+
+        const intersectNext = this.references.get('intersectNextImage')[0]
+        const arrowNext = this.references.get('arrowNextImage')[0]
+        arrowNext.material = this.hover.inactiveMaterial
+        this.pagination.nextIntersect = this.game.cursor.addIntersects({
+            active: false,
+            shapes:
+            [
+                new THREE.Sphere(intersectNext.position, intersectNext.scale.x)
+            ],
+            onClick: () =>
+            {
+                this.next()
+            },
+            onEnter: () =>
+            {
+                arrowNext.material = this.hover.activeMaterial
+            },
+            onLeave: () =>
+            {
+                arrowNext.material = this.hover.inactiveMaterial
+            }
+        })
+
+        // Update
         this.pagination.update = () =>
         {
             let i = 0
@@ -477,7 +535,7 @@ export class Projects
                         gsap.to(item.mesh.scale, { x: 1, y: 1, z: 1, duration: 0.5, ease: 'power1.inOut', overwrite: true })
                         item.mesh.visible = true
                         item.visible = true
-                        item.intersect.active = true
+                        item.intersect.active = this.state === Projects.STATE_OPENING || this.state === Projects.STATE_OPEN
                     }
                 }
                 else
@@ -520,12 +578,12 @@ export class Projects
         for(const child of this.attributes.group.children)
         {
             const item = {}
-            // item.textWrapper = this.texts[child.name]
+            // item.textCanvas = this.texts[child.name]
             item.group = child
             item.visible = false
             item.group.visible = false
             const textMesh = item.group.children.find(_child => _child.name.startsWith('text'))
-            item.textWrapper = new TextWrapper(
+            item.textCanvas = new TextCanvas(
                 this.texts.fontFamily,
                 this.texts.fontWeight,
                 this.texts.fontSizeMultiplier * 0.23,
@@ -536,7 +594,7 @@ export class Projects
                 0.2
             )
 
-            this.texts.createMaterialOnMesh(textMesh, item.textWrapper.texture)
+            this.texts.createMaterialOnMesh(textMesh, item.textCanvas.texture)
 
             this.attributes.items[child.name] = item
         }
@@ -571,7 +629,7 @@ export class Projects
                         item.group.visible = true
                         gsap.to(item.group.scale, { x: 1, y: 1, z: 1, duration: 1, delay: 0.2 * i, ease: 'back.out(2)', overwrite: true })
 
-                        item.textWrapper.updateText(attribute)
+                        item.textCanvas.updateText(attribute)
 
                         item.group.position.y = - i * 0.75
                         
@@ -589,12 +647,16 @@ export class Projects
         this.adjacents = {}
         this.adjacents.status = 'hidden'
 
-        // Previous
+        /**
+         * Previous
+         */
         this.adjacents.previous = {}
         this.adjacents.previous.group = this.references.get('previous')[0]
         this.adjacents.previous.inner = this.adjacents.previous.group.children[0]
+
+        // Text
         this.adjacents.previous.textMesh = this.adjacents.previous.inner.children.find(_child => _child.name.startsWith('text'))
-        this.adjacents.previous.textWrapper = new TextWrapper(
+        this.adjacents.previous.textCanvas = new TextCanvas(
             this.texts.fontFamily,
             this.texts.fontWeight,
             this.texts.fontSizeMultiplier * 0.3,
@@ -604,8 +666,13 @@ export class Projects
             'center',
             0.3
         )
-        this.texts.createMaterialOnMesh(this.adjacents.previous.textMesh, this.adjacents.previous.textWrapper.texture)
+        this.texts.createMaterialOnMesh(this.adjacents.previous.textMesh, this.adjacents.previous.textCanvas.texture)
+
+        // Arrow
+        const arrowPrevious = this.references.get('arrowPreviousProject')[0]
+        arrowPrevious.material = this.hover.inactiveMaterial
         
+        // Intersect
         const intersectPrevious = this.references.get('intersectPreviousProject')[0]
         this.adjacents.previous.intersect = this.game.cursor.addIntersects({
             active: false,
@@ -616,15 +683,27 @@ export class Projects
             onClick: () =>
             {
                 this.previousProject(true)
+            },
+            onEnter: () =>
+            {
+                arrowPrevious.material = this.hover.activeMaterial
+            },
+            onLeave: () =>
+            {
+                arrowPrevious.material = this.hover.inactiveMaterial
             }
         })
 
-        // Next
+        /**
+         * Next
+         */
         this.adjacents.next = {}
         this.adjacents.next.group = this.references.get('next')[0]
         this.adjacents.next.inner = this.adjacents.next.group.children[0]
+
+        // Text
         this.adjacents.next.textMesh = this.adjacents.next.inner.children.find(_child => _child.name.startsWith('text'))
-        this.adjacents.next.textWrapper = new TextWrapper(
+        this.adjacents.next.textCanvas = new TextCanvas(
             this.texts.fontFamily,
             this.texts.fontWeight,
             this.texts.fontSizeMultiplier * 0.3,
@@ -634,8 +713,13 @@ export class Projects
             'center',
             0.3
         )
-        this.texts.createMaterialOnMesh(this.adjacents.next.textMesh, this.adjacents.next.textWrapper.texture)
+        this.texts.createMaterialOnMesh(this.adjacents.next.textMesh, this.adjacents.next.textCanvas.texture)
 
+        // Arrow
+        const arrowNext = this.references.get('arrowNextProject')[0]
+        arrowNext.material = this.hover.inactiveMaterial
+        
+        // Intersect
         const intersectNext = this.references.get('intersectNextProject')[0]
         this.adjacents.next.intersect = this.game.cursor.addIntersects({
             active: false,
@@ -646,10 +730,20 @@ export class Projects
             onClick: () =>
             {
                 this.nextProject()
+            },
+            onEnter: () =>
+            {
+                arrowNext.material = this.hover.activeMaterial
+            },
+            onLeave: () =>
+            {
+                arrowNext.material = this.hover.inactiveMaterial
             }
         })
 
-        // Update
+        /**
+         * Update
+         */
         this.adjacents.update = () =>
         {
             if(this.adjacents.status === 'hiding')
@@ -667,8 +761,8 @@ export class Projects
                 gsap.to(this.adjacents.previous.inner.rotation, { z: 0, duration: 1, delay: 0, ease: 'back.out(2)', overwrite: true })
                 gsap.to(this.adjacents.next.inner.rotation, { z: 0, duration: 1, delay: 0.4, ease: 'back.out(2)', overwrite: true })
 
-                this.adjacents.previous.textWrapper.updateText(this.projects.previous.titleSmall)
-                this.adjacents.next.textWrapper.updateText(this.projects.next.titleSmall)
+                this.adjacents.previous.textCanvas.updateText(this.projects.previous.titleSmall)
+                this.adjacents.next.textCanvas.updateText(this.projects.next.titleSmall)
             })
         }
     }
@@ -680,7 +774,7 @@ export class Projects
         this.title.group = this.references.get('title')[0]
         this.title.inner = this.title.group.children[0]
         this.title.textMesh = this.title.inner.children.find(_child => _child.name.startsWith('text'))
-        this.title.textWrapper = new TextWrapper(
+        this.title.textCanvas = new TextCanvas(
             this.texts.fontFamily,
             this.texts.fontWeight,
             this.texts.fontSizeMultiplier * 0.4,
@@ -689,7 +783,7 @@ export class Projects
             this.texts.density,
             'center'
         )
-        this.texts.createMaterialOnMesh(this.title.textMesh, this.title.textWrapper.texture)
+        this.texts.createMaterialOnMesh(this.title.textMesh, this.title.textCanvas.texture)
 
         this.title.update = (direction) =>
         {
@@ -707,7 +801,7 @@ export class Projects
 
                 gsap.to(this.title.inner.rotation, { x: Math.PI * 2 * rotationDirection, duration: 1, delay: 0, ease: 'back.out(2)', overwrite: true })
 
-                this.title.textWrapper.updateText(this.projects.current.title)
+                this.title.textCanvas.updateText(this.projects.current.title)
             } })
         }
     }
@@ -718,9 +812,11 @@ export class Projects
         this.url.status = 'hidden'
         this.url.group = this.references.get('url')[0]
         this.url.inner = this.url.group.children[0]
+
+        // Text
         this.url.textMesh = this.url.inner.children.find(_child => _child.name.startsWith('text'))
         this.url.panel = this.url.inner.children.find(_child => _child.name.startsWith('panel'))
-        this.url.textWrapper = new TextWrapper(
+        this.url.textCanvas = new TextCanvas(
             this.texts.fontFamily,
             this.texts.fontWeight,
             this.texts.fontSizeMultiplier * 0.23,
@@ -729,8 +825,57 @@ export class Projects
             this.texts.density,
             'center'
         )
-        this.texts.createMaterialOnMesh(this.url.textMesh, this.url.textWrapper.texture)
+        this.url.mixStrength = uniform(0)
 
+        // Material
+        const material = new THREE.MeshLambertNodeMaterial({ transparent: true })
+
+        const alpha = texture(this.url.textCanvas.texture).r
+
+        const shadedOutput = this.game.lighting.lightOutputNodeBuilder(this.texts.baseColor, float(1), normalWorld, float(1)).rgb
+        material.outputNode = vec4(
+            mix(
+                mix(
+                    shadedOutput,
+                    this.texts.baseColor,
+                    this.shadeMix.texts.uniform
+                ),
+                this.texts.baseColor.mul(1.5),
+                this.url.mixStrength
+            ),
+            alpha
+        )
+
+        // Mesh
+        this.url.textMesh.castShadow = false
+        this.url.textMesh.receiveShadow = false
+        this.url.textMesh.material = material
+
+        // Intersect
+        const intersect = this.references.get('intersectUrl')[0]
+        intersect.visible = false
+ 
+        this.url.intersect = this.game.cursor.addIntersects({
+            active: false,
+            shapes:
+            [
+                intersect
+            ],
+            onClick: () =>
+            {
+                this.url.open()
+            },
+            onEnter: () =>
+            {
+                this.url.mixStrength.value = 1
+            },
+            onLeave: () =>
+            {
+                this.url.mixStrength.value = 0
+            }
+        })
+
+        // Update
         this.url.update = (direction) =>
         {
             if(this.url.status === 'hiding')
@@ -747,14 +892,15 @@ export class Projects
 
                 gsap.to(this.url.inner.rotation, { x: Math.PI * 2 * rotationDirection, duration: 1, delay: 0, ease: 'back.out(2)', overwrite: true })
 
-                this.url.textWrapper.updateText(this.projects.current.url)
+                this.url.textCanvas.updateText(this.projects.current.url.replace(/https?:\/\//, ''))
 
-                const ratio = this.url.textWrapper.getMeasure().width / this.texts.density
+                const ratio = this.url.textCanvas.getMeasure().width / this.texts.density
                 this.url.panel.scale.x = ratio + 0.2
 
             } })
         }
 
+        // Open
         this.url.open = () =>
         {
             if(this.projects.current.url)
@@ -953,8 +1099,9 @@ export class Projects
             
         this.adjacents.next.intersect.active = true
         this.adjacents.previous.intersect.active = true
-        this.images.previousIntersect.active = true
-        this.images.nextIntersect.active = true
+        this.pagination.previousIntersect.active = true
+        this.pagination.nextIntersect.active = true
+        this.url.intersect.active = true
 
         // Deactivate physical vehicle
         this.game.physicalVehicle.deactivate()
@@ -999,6 +1146,9 @@ export class Projects
 
         this.adjacents.next.intersect.active = false
         this.adjacents.previous.intersect.active = false
+        this.pagination.previousIntersect.active = false
+        this.pagination.nextIntersect.active = false
+        this.url.intersect.active = false
 
         // Activate physical vehicle
         this.game.physicalVehicle.activate()
