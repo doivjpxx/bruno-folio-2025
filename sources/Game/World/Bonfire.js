@@ -16,6 +16,7 @@ export class Bonfire
         this.setParticles()
         this.setInteractiveArea()
         this.setHashes()
+        this.setBurn()
 
         this.game.ticker.events.on('tick', () =>
         {
@@ -76,11 +77,12 @@ export class Bonfire
 
         const geometry = new THREE.PlaneGeometry(1, 1)
 
-        const mesh = new THREE.Mesh(geometry, material)
-        mesh.position.copy(this.position)
-        mesh.count = count
-        mesh.frustumCulled = true
-        this.game.scene.add(mesh)
+        this.particles = new THREE.Mesh(geometry, material)
+        this.particles.visible = false
+        this.particles.position.copy(this.position)
+        this.particles.count = count
+        this.particles.frustumCulled = true
+        this.game.scene.add(this.particles)
     }
     
     setInteractiveArea()
@@ -93,6 +95,9 @@ export class Bonfire
             {
                 this.game.player.respawn(null, () =>
                 {
+                    this.particles.visible = true
+                    this.burn.material = this.game.materials.getFromName('emissiveGradientWarm')
+
                     this.game.entities.reset()
                 })
             }
@@ -127,6 +132,12 @@ export class Bonfire
 
         const mesh = this.references.get('hashes')[0]
         mesh.material = material
+    }
+
+    setBurn()
+    {
+        this.burn = this.references.get('burn')[0]
+        this.burn.material = this.game.materials.getFromName('black')
     }
 
     update()
