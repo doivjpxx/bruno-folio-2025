@@ -119,40 +119,40 @@ export class Scenery
 
     setStaticObjects()
     {
-        let meshesCount = 0
-        const inspectChildren = (model, indent = '') =>
-        {
-            let children =[...model.children]
+        // let meshesCount = 0
+        // const inspectChildren = (model, indent = '') =>
+        // {
+        //     let children =[...model.children]
 
-            for(const child of children)
-            {
-                let material = ''
+        //     for(const child of children)
+        //     {
+        //         let material = ''
                 
-                if(child.isMesh)
-                {
-                    meshesCount++
-                    material = `(${child.material ? child.material.name : 'no material'})`
-                }
+        //         if(child.isMesh)
+        //         {
+        //             meshesCount++
+        //             material = `(${child.material ? child.material.name : 'no material'})`
+        //         }
                 
-                let color = '#ffffff'
+        //         let color = '#ffffff'
 
-                if(child.isMesh)
-                    color = 'cyan'
+        //         if(child.isMesh)
+        //             color = 'cyan'
 
-                console.log(`%c${indent}${child.name} ${material}`, `color: ${color}; font-weight: bold;`)
+        //         console.log(`%c${indent}${child.name} ${material}`, `color: ${color}; font-weight: bold;`)
 
-                if(child.name === 'hull012')
-                    console.log(child)
+        //         if(child.name === 'hull012')
+        //             console.log(child)
 
-                if(child.children?.length)
-                    inspectChildren(child, indent + '    ')
-            }
-        }
+        //         if(child.children?.length)
+        //             inspectChildren(child, indent + '    ')
+        //     }
+        // }
 
         // Models
         const model = this.game.resources.sceneryStaticModel.scene
-        inspectChildren(model)
-        console.log('Meshes count:', meshesCount)
+        // inspectChildren(model)
+        // console.log('Meshes count:', meshesCount)
         
         // References
         this.references.parse(model)
