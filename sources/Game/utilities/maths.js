@@ -29,4 +29,12 @@ function safeMod(n, m)
     return ((n % m) + m) % m
 }
 
-export { clamp, remap, remapClamp, lerp, smoothstep, safeMod }
+function signedModDelta(a, b, mod)
+{
+    let delta = (b - a + mod) % mod
+    if(delta > mod / 2)
+        delta -= mod
+    return delta
+}
+
+export { clamp, remap, remapClamp, lerp, smoothstep, safeMod, signedModDelta }

@@ -1,9 +1,15 @@
 export default [
     {
+        title: 'Black Hole',
+        url: 'https://awwwards-2022-workshop.vercel.app',
+        image: 'black-hole.webp',
+        imageMini: 'black-hole-mini.webp'
+    },
+    {
         title: 'My Room in 3D',
         url: 'https://my-room-in-3d.vercel.app',
-        image: 'my-room-in-3d.png',
-        imageMini: 'my-room-in-3d-mini.png',
+        image: 'my-room-in-3d.webp',
+        imageMini: 'my-room-in-3d-mini.webp',
     },
     {
         title: 'Particles System',
@@ -14,8 +20,8 @@ export default [
     {
         title: 'Holographic terrain',
         url: 'https://experiment-holographic-terrain.vercel.app',
-        image: 'holographic-terrain.png',
-        imageMini: 'holographic-terrain-mini.png'
+        image: 'holographic-terrain.webp',
+        imageMini: 'holographic-terrain-mini.webp'
     },
     {
         title: 'Woodkid Volcano Robot',
@@ -38,25 +44,19 @@ export default [
     {
         title: 'DOOM Portal',
         url: 'https://doom-portal-in-webgl.vercel.app',
-        image: 'doom-portal.png',
-        imageMini: 'doom-portal-mini.png'
+        image: 'doom-portal.webp',
+        imageMini: 'doom-portal-mini.webp'
     },
     {
         title: 'Organic Sphere',
         url: 'https://organic-sphere.vercel.app',
-        image: 'organic-sphere.png',
-        imageMini: 'organic-sphere-mini.png'
+        image: 'organic-sphere.webp',
+        imageMini: 'organic-sphere-mini.webp'
     },
     {
         title: 'Attractors',
         url: 'https://threejs.org/examples/…attractors_particles.html',
-        image: 'attractors.png',
-        imageMini: 'attractors-mini.png'
-    },
-    {
-        title: 'Black Hole',
-        url: 'https://awwwards-2022-workshop.vercel.app',
-        image: 'black-hole.png',
-        imageMini: 'black-hole-mini.png'
+        image: 'attractors.webp',
+        imageMini: 'attractors-mini.webp'
     }
 ]

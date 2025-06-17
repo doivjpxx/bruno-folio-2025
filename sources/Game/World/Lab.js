@@ -5,7 +5,7 @@ import gsap from 'gsap'
 import lab from '../../data/lab.js'
 import { TextCanvas } from '../TextCanvas.js'
 import { add, color, float, Fn, If, luminance, mix, mul, normalWorld, positionGeometry, positionWorld, sin, step, texture, uniform, uv, vec2, vec3, vec4 } from 'three/tsl'
-import { remapClamp, safeMod } from '../utilities/maths.js'
+import { remapClamp, safeMod, signedModDelta } from '../utilities/maths.js'
 
 export class Lab
 {
@@ -863,59 +863,6 @@ export class Lab
             }
         }
 
-        // // Beam
-        // {
-        //     const material = new THREE.MeshBasicNodeMaterial({ side: THREE.DoubleSide, transparent: true, depthTest: true, depthWrite: false })
-
-        //     // const colorA = uniform(color('#ff0083'))
-        //     // const colorB = uniform(color('#3018eb'))
-        //     // const intensity = uniform(1.7)
-        //     this.colorBottom = uniform(color('#a64dff'))
-        //     this.emissiveBottom = uniform(8)
-        //     this.beamAttenuation = uniform(1)
-
-    
-        //     material.outputNode = Fn(() =>
-        //     {
-        //         const baseUv = uv().toVar()
-
-        //         // Noise
-        //         const noiseUv = vec2(
-        //             baseUv.x.mul(2).add(baseUv.y.mul(-0.2)).add(this.game.ticker.elapsedScaledUniform.mul(0.1)),
-        //             baseUv.y.mul(0.1).add(this.game.ticker.elapsedScaledUniform.mul(0.2))
-        //         )
-        //         const noise = texture(this.game.noises.others, noiseUv).r
-        //         noise.addAssign(baseUv.y.mul(2).fract().oneMinus())
-
-        //         // Emissive
-        //         const emissiveColor = this.colorBottom.mul(this.emissiveBottom)
-
-        //         // Goo
-        //         const gooColor = this.game.fog.strength.mix(vec3(0), this.game.fog.color) // Fog
-
-        //         // Mix
-        //         // const gooMask = step(noise, 0.95)
-        //         const gooMask = step(0.85, noise)
-        //         const finalColor = mix(emissiveColor, gooColor, gooMask)
-
-        //         // Discard
-        //         noise.greaterThan(1).discard()
-                
-        //         return vec4(finalColor, 1)
-        //     })()
-
-        //     const beam = this.references.get('beam')[0]
-        //     beam.material = material
-        //     beam.castShadow = false
-
-
-        //     if(this.game.debug.active)
-        //     {
-        //         this.game.debug.addThreeColorBinding(this.debugPanel, this.colorBottom.value, 'colorBottom')
-        //         // this.game.debug.addThreeColorBinding(this.debugPanel, colorB.value, 'colorB')
-        //     }
-        // }
-
         this.scroller.gearA.rotation.reorder('YXZ')
         this.scroller.gearB.rotation.reorder('YXZ')
         this.scroller.gearC.rotation.reorder('YXZ')
@@ -936,7 +883,6 @@ export class Lab
 
                 const scale = remapClamp(mini.group.position.y, 3.3, 3.9, 1, 0)
                 mini.group.scale.y = scale
-                // mini.group.rotation.y = 0.523 - (1 - scale) * 3
 
                 mini.group.visible = scale > 0
                 mini.intersect.active = mini.group.visible && (this.state === Lab.STATE_OPEN || this.state === Lab.STATE_OPENING)
@@ -1268,7 +1214,7 @@ export class Lab
         this.blackBoard.active = false
     }
 
-    changeProject(index = 0, direction = Lab.DIRECTION_NEXT)
+    changeProject(index = 0, direction = null)
     {
         // Loop index
         let loopIndex = index
@@ -1281,6 +1227,10 @@ export class Lab
         // Already active
         if(this.navigation.index === loopIndex)
             return
+
+        // Direction
+        if(direction === null)
+            direction = signedModDelta(loopIndex, this.navigation.index, this.data.length) > 0 ? Lab.DIRECTION_PREVIOUS : Lab.DIRECTION_NEXT
 
         // Save
         this.navigation.index = loopIndex
