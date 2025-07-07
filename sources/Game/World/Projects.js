@@ -23,7 +23,7 @@ export class Projects
         if(this.game.debug.active)
         {
             this.debugPanel = this.game.debug.panel.addFolder({
-                title: '📚 Projects',
+                title: '🔨 Projects',
                 expanded: false,
             })
         }
@@ -1124,8 +1124,6 @@ export class Projects
             const baseColor = color('#6F6A87')
             const lightOutput = this.game.lighting.lightOutputNodeBuilder(baseColor, float(1), vec3(0, 1, 0), totalShadows, true, false)
 
-            const distanceToCenter = baseUv.sub(0.5).length()
-
             const voronoi = texture(
                 this.game.noises.voronoi,
                 baseUv
@@ -1137,6 +1135,15 @@ export class Projects
         })()
 
         this.oven.charcoal.material = material
+
+        // Debug
+        this.oven.thresholdBinding = this.game.debug.addManualBinding(
+            this.debugPanel,
+            this.oven.threshold,
+            'value',
+            { label: 'ovenThreshold', min: 0, max: 1, step: 0.001 },
+            () => - Math.sin(this.game.ticker.elapsedScaled - 0.5) * 0.1 + 0.25
+        )
     }
 
     setGrinder()
@@ -1150,6 +1157,7 @@ export class Projects
         
         // Hammer
         this.anvil.hammer = this.references.get('hammer')[0]
+        this.anvil.hammer.rotation.reorder('YXZ')
 
         // Blade
         this.anvil.blade = this.references.get('blade')[0]
@@ -1383,13 +1391,12 @@ export class Projects
     {
         // Oven
         this.oven.blower.scale.y = (Math.sin(this.game.ticker.elapsedScaled) * 0.2 + 0.8)
-        this.oven.threshold.value = (- Math.sin(this.game.ticker.elapsedScaled - 0.5) * 0.1 + 0.25)
+        this.oven.thresholdBinding.update()
 
         // Grinder
         this.grinder.rotation.z = - this.game.ticker.elapsedScaled * 0.75
 
         // Anvil
-        this.anvil.hammer.rotation.reorder('YXZ')
-        this.anvil.hammer.rotation.z = Math.pow(1 - Math.abs(Math.sin(this.game.ticker.elapsedScaled * 1)), 5) - 1
+        this.anvil.hammer.rotation.z = Math.pow(1 - Math.abs(Math.cos(this.game.ticker.elapsedScaled * 1)), 5) - 1
     }
 }
