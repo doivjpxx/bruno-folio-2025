@@ -211,7 +211,6 @@ export class Player
         /**
          * Nipple
          */
-
         if(this.game.inputs.nipple.active && this.game.inputs.nipple.strength > 0.2)
         {
             this.game.view.focusPoint.isTracking = true
@@ -223,7 +222,12 @@ export class Player
             let angleDelta = smallestAngle(vehicleAngle, nippleAngle)
             let angleDeltaAbs = Math.abs(angleDelta)
 
-            const forward = angleDeltaAbs < Math.PI * 0.65
+            const nippleForwardAmplitude = Math.PI * 1.5
+            const forward = angleDeltaAbs < nippleForwardAmplitude / 2
+
+            this.game.inputs.nipple.forward.setAngle(vehicleAngle + Math.PI * 0.25)
+            this.game.inputs.nipple.forward.setAmplitude(nippleForwardAmplitude)
+            this.game.inputs.nipple.setThick(this.boosting)
             
             if(forward)
             {
