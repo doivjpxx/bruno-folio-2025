@@ -2,6 +2,7 @@ import * as THREE from 'three/webgpu'
 import { Game } from './Game.js'
 import { color, distance, float, Fn, max, min, mix, mul, normalWorld, positionWorld, step, texture, uniform, uv, vec2, vec3, vec4 } from 'three/tsl'
 import gsap from 'gsap'
+import { Inputs } from './Inputs/Inputs.js'
 
 export class InteractiveAreas
 {
@@ -147,15 +148,17 @@ export class InteractiveAreas
         // Material
         const keyMaterial = new THREE.MeshLambertNodeMaterial({ transparent: true, depthTest: false })
 
-        keyMaterial.outputNode = Fn(() =>
+        const keyOutput = Fn(([keyTexture]) =>
         {
-            const key = texture(this.game.resources.interactiveAreasKeyIconTexture, uv()).r
+            const key = keyTexture.r
             
             // Discard
             key.lessThan(0.5).discard()
 
             return vec4(vec3(this.frontColor), 1)
-        })()
+        })
+
+        keyMaterial.outputNode = keyOutput(texture(this.game.resources.interactiveAreasKeyIconEnterTexture, uv()))
 
         // Mesh
         const key = new THREE.Mesh(
@@ -167,6 +170,26 @@ export class InteractiveAreas
         key.position.z = 0.01
         key.visible = false
         group.add(key)
+
+        this.game.inputs.events.on('modeChange', () =>
+        {
+            if(this.game.inputs.mode === Inputs.MODE_GAMEPAD)
+            {
+                keyMaterial.outputNode = keyOutput(texture(this.game.resources.interactiveAreasKeyIconCircleTexture, uv()))
+                keyMaterial.needsUpdate = true
+                group.add(key)
+            }
+            else if(this.game.inputs.mode === Inputs.MODE_MOUSEKEYBOARD)
+            {
+                keyMaterial.outputNode = keyOutput(texture(this.game.resources.interactiveAreasKeyIconEnterTexture, uv()))
+                keyMaterial.needsUpdate = true
+                group.add(key)
+            }
+            else if(this.game.inputs.mode === Inputs.MODE_TOUCH)
+            {
+                group.remove(key)
+            }
+        })
 
         /**
          * Label

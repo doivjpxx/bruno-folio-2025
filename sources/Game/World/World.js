@@ -35,7 +35,7 @@ export class World
         this.whispers = new Whispers()
         this.tornado = new Tornado()
         this.scenery = new Scenery()
-        this.easter = new Easter()
+        // this.easter = new Easter()
 
         // this.setAxesHelper()
         // this.setCollisionGroupsTest()
