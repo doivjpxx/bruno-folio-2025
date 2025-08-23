@@ -35,7 +35,7 @@ export class RayCursor
     setPointerTesting()
     {
         this.game.inputs.addActions([
-            { name: 'rayPointer', categories: [ 'playing' ], keys: [ 'Pointer.any' ] },
+            { name: 'rayPointer', categories: [ 'playing', 'cinematic' ], keys: [ 'Pointer.any' ] },
         ])
 
         this.game.inputs.events.on('rayPointer', (action) =>
