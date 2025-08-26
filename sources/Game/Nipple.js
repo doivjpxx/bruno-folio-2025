@@ -5,6 +5,7 @@ import { clamp } from 'three/src/math/MathUtils.js'
 import { smallestAngle } from './utilities/maths.js'
 import gsap from 'gsap'
 import { Events } from './Events.js'
+import { Inputs } from './Inputs/Inputs.js'
 
 export class Nipple
 {
@@ -118,7 +119,6 @@ export class Nipple
         this.mesh = new THREE.Mesh(geometry, material)
 
         this.mesh.scale.setScalar(10)
-        // this.mesh.position.y = 0.75
 
         this.group.add(this.mesh)
     }
@@ -144,6 +144,9 @@ export class Nipple
 
         this.game.inputs.events.on('rayPointer', (action) =>
         {
+            if(this.game.inputs.mode !== Inputs.MODE_TOUCH)
+                return
+                
             // Start
             if(action.trigger === 'start')
             {
