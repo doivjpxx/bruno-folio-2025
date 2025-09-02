@@ -1,5 +1,7 @@
 import { Game } from '../Game.js'
+import { Inputs } from '../Inputs/Inputs.js'
 import { InteractiveAreas } from '../InteractiveAreas.js'
+import { Modals } from '../Modals.js'
 
 export class Controls
 {
@@ -21,6 +23,20 @@ export class Controls
         this.modal.instance.events.on('close', () =>
         {
             this.interactiveArea.reveal()
+        })
+
+        this.game.inputs.events.on('modeChange', () =>
+        {
+            // Modal 
+            if(this.game.modals.state !== Modals.CLOSED)
+                return
+            
+            if(this.game.inputs.mode === Inputs.MODE_GAMEPAD)
+                this.modal.instance.tabs.goTo('gamepad')
+            else if(this.game.inputs.mode === Inputs.MODE_MOUSEKEYBOARD)
+                this.modal.instance.tabs.goTo('mouse-keyboard')
+            else if(this.game.inputs.mode === Inputs.MODE_TOUCH)
+                this.modal.instance.tabs.goTo('touch')
         })
     }
 
