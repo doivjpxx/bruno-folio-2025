@@ -29,12 +29,12 @@ export class ClosingManager
                 }
 
                 // Projects => Close
-                else if(this.game.world.scenery?.projects?.state === Projects.STATE_OPEN)
-                    this.game.world.scenery.projects.close()
+                else if(this.game.world.areas?.projects?.state === Projects.STATE_OPEN)
+                    this.game.world.areas.projects.close()
 
                 // Lab => Close
-                else if(this.game.world.scenery?.lab?.state === Lab.STATE_OPEN)
-                    this.game.world.scenery.lab.close()
+                else if(this.game.world.areas?.lab?.state === Lab.STATE_OPEN)
+                    this.game.world.areas.lab.close()
 
                 // Nothing opened and used the keyboard Escape key => Open default modal
                 else if(action.activeKeys.has('Keyboard.Escape'))

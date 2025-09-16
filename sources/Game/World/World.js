@@ -5,7 +5,7 @@ import { Grid } from './Grid.js'
 import { Grass } from './Grass.js'
 import { color, float, Fn, instance, normalWorld, positionLocal, texture, vec3, vec4 } from 'three/tsl'
 import { WaterSurface } from './WaterSurface.js'
-import { Scenery } from './Scenery.js'
+import { Areas } from './Areas.js'
 import { WindLines } from './WindLines.js'
 import { Leaves } from './Leaves.js'
 import { Lightnings } from './Lightnings.js'
@@ -15,6 +15,10 @@ import { Whispers } from './Whispers.js'
 import { VisualVehicle } from './VisualVehicle.js'
 import { Tornado } from './Tornado.js'
 import { Easter } from '../Easter.js'
+import { Flowers } from './Flowers.js'
+import { Bricks } from './Bricks.js'
+import { Trees } from './Trees.js'
+import { Bushes } from './Bushes.js'
 import { MeshDefaultMaterial } from '../Materials/MeshDefaultMaterial.js'
 
 export class World
@@ -35,7 +39,13 @@ export class World
         this.snow = new Snow()
         this.whispers = new Whispers()
         this.tornado = new Tornado()
-        this.scenery = new Scenery()
+        this.bushes = new Bushes()
+        this.birchTrees = new Trees('Birch Tree', this.game.resources.birchTreesVisualModel.scene, this.game.resources.birchTreesReferencesModel.scene.children, '#ff782b')
+        this.oakTrees = new Trees('Oak Tree', this.game.resources.oakTreesVisualModel.scene, this.game.resources.oakTreesReferencesModel.scene.children, '#c4c557')
+        this.cherryTrees = new Trees('Cherry Tree', this.game.resources.cherryTreesVisualModel.scene, this.game.resources.cherryTreesReferencesModel.scene.children, '#ff6da8')
+        this.flowers = new Flowers()
+        this.bricks = new Bricks()
+        this.areas = new Areas()
 
         // this.easter = new Easter()
 

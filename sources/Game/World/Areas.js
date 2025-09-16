@@ -1,9 +1,5 @@
 import * as THREE from 'three/webgpu'
 import { Game } from '../Game.js'
-import { Flowers } from './Flowers.js'
-import { Bricks } from './Bricks.js'
-import { Trees } from './Trees.js'
-import { Bushes } from './Bushes.js'
 import { PoleLights } from './PoleLights.js'
 import { Altar } from './Altar.js'
 import { CookieStand } from './CookieStand.js'
@@ -16,7 +12,7 @@ import { Career } from './Career.js'
 import { Social } from './Social.js'
 import { Toilet } from './Toilet.js'
 
-export class Scenery
+export class Areas
 {
     constructor()
     {
@@ -25,20 +21,13 @@ export class Scenery
         if(this.game.debug.active)
         {
             this.debugPanel = this.game.debug.panel.addFolder({
-                title: '🛋️ Scenery',
+                title: '🛋️ Areas',
                 expanded: false,
             })
         }
 
         this.setReferences()
         this.setObjects()
-
-        this.bushes = new Bushes()
-        this.birchTrees = new Trees('Birch Tree', this.game.resources.birchTreesVisualModel.scene, this.game.resources.birchTreesReferencesModel.scene.children, '#ff782b')
-        this.oakTrees = new Trees('Oak Tree', this.game.resources.oakTreesVisualModel.scene, this.game.resources.oakTreesReferencesModel.scene.children, '#c4c557')
-        this.cherryTrees = new Trees('Cherry Tree', this.game.resources.cherryTreesVisualModel.scene, this.game.resources.cherryTreesReferencesModel.scene.children, '#ff6da8')
-        this.flowers = new Flowers()
-        this.bricks = new Bricks()
 
         const toiletReferences = this.references.getStartingWith('toilet')
         if(toiletReferences.size)
@@ -135,7 +124,7 @@ export class Scenery
 
     setObjects()
     {
-        const model = [...this.game.resources.sceneryModel.scene.children]
+        const model = [...this.game.resources.areasModel.scene.children]
         for(const child of model)
         {
             // References
