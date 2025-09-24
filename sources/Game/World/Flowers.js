@@ -19,7 +19,7 @@ export class Flowers
         {
             this.debugPanel = this.game.debug.panel.addFolder({
                 title: '🌸 Flowers',
-                expanded: true,
+                expanded: false,
             })
         }
 

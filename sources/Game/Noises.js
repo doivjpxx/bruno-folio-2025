@@ -185,9 +185,16 @@ export class Noises
         )
 
 		// Render
-		this.game.rendering.renderer.setRenderTarget(renderTarget)
 		this.quadMesh.material = material
+		
+		const rendererState = THREE.RendererUtils.resetRendererState(this.game.rendering.renderer)
+
+        this.game.rendering.renderer.setPixelRatio(1)
+		this.game.rendering.renderer.setRenderTarget(renderTarget)
 		this.quadMesh.render(this.game.rendering.renderer)
+        this.game.rendering.renderer.setRenderTarget(null)
+
+		THREE.RendererUtils.restoreRendererState(this.game.rendering.renderer, rendererState)
 	}
 
 	setOthers()
@@ -217,8 +224,15 @@ export class Noises
         )
 
 		// Render
-		this.game.rendering.renderer.setRenderTarget(renderTarget)
 		this.quadMesh.material = material
+		
+		const rendererState = THREE.RendererUtils.resetRendererState(this.game.rendering.renderer)
+
+        this.game.rendering.renderer.setPixelRatio(1)
+		this.game.rendering.renderer.setRenderTarget(renderTarget)
 		this.quadMesh.render(this.game.rendering.renderer)
+        this.game.rendering.renderer.setRenderTarget(null)
+
+		THREE.RendererUtils.restoreRendererState(this.game.rendering.renderer, rendererState)
 	}
 }

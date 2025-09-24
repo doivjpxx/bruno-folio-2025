@@ -419,8 +419,18 @@ export class Snow
             this.roundedPosition.value.y - this.game.tracks.focusPoint.y
         )
 
+        // this.game.rendering.renderer.setRenderTarget(this.snowElevation.renderTarget)
+        // this.snowElevation.quadMesh.render(this.game.rendering.renderer)
+        // this.game.rendering.renderer.setRenderTarget(null)
+        
+        // Render
+        const rendererState = THREE.RendererUtils.resetRendererState(this.game.rendering.renderer)
+
+        this.game.rendering.renderer.setPixelRatio(1)
         this.game.rendering.renderer.setRenderTarget(this.snowElevation.renderTarget)
         this.snowElevation.quadMesh.render(this.game.rendering.renderer)
         this.game.rendering.renderer.setRenderTarget(null)
+
+        THREE.RendererUtils.restoreRendererState(this.game.rendering.renderer, rendererState)
     }
 }

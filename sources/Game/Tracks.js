@@ -74,15 +74,14 @@ export class Tracks
         this.camera.position.z = this.focusPoint.y
 
         // Render
-        const clearAlpha = this.game.rendering.renderer.getClearAlpha()
-        
-        this.game.rendering.renderer.setClearAlpha(0)
+        const rendererState = THREE.RendererUtils.resetRendererState(this.game.rendering.renderer)
+
+        this.game.rendering.renderer.setPixelRatio(1)
         this.game.rendering.renderer.setRenderTarget(this.renderTarget)
-
         this.game.rendering.renderer.render(this.scene, this.camera)
-
         this.game.rendering.renderer.setRenderTarget(null)
-        this.game.rendering.renderer.setClearAlpha(clearAlpha)
+
+        THREE.RendererUtils.restoreRendererState(this.game.rendering.renderer, rendererState)
     }
 }
 
