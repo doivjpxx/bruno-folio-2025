@@ -28,6 +28,7 @@ export class Bowling
         this.setRestart()
         this.setScreen()
         this.setBumpers()
+        this.setJukebox()
 
         this.game.ticker.events.on('tick', () =>
         {
@@ -290,7 +291,6 @@ export class Bowling
                     overwrite: true,
                     onUpdate: () =>
                     {
-                        console.log(- (1 - this.bumpers.progress) * this.bumpers.height)
                         this.bumpers.object.physical.body.setNextKinematicTranslation({
                             x: this.bumpers.mesh.position.x,
                             y: - (1 - this.bumpers.progress) * this.bumpers.height,
@@ -312,6 +312,32 @@ export class Bowling
             () =>
             {
                 this.bumpers.toggle()
+            },
+            () =>
+            {
+                this.game.inputs.interactiveButtons.addItems(['interact'])
+            },
+            () =>
+            {
+                this.game.inputs.interactiveButtons.removeItems(['interact'])
+            },
+            () =>
+            {
+                this.game.inputs.interactiveButtons.removeItems(['interact'])
+            }
+        )
+    }
+
+    setJukebox()
+    {
+        // Interactive point
+        this.game.interactivePoints.create(
+            this.references.get('jukeboxInteractivePoint')[0].position,
+            'Change song',
+            InteractivePoints.ALIGN_LEFT,
+            () =>
+            {
+                console.log('change music')
             },
             () =>
             {
