@@ -43,7 +43,7 @@ export class Terrain
         const context = canvas.getContext('2d')
 
         const colors = [
-            { stop: 0, value: '#ffa94e' },
+            { stop: 0.1, value: '#ffa94e' },
             { stop: 0.3, value: '#5bc2b9' },
             { stop: 0.9, value: '#13375f' },
         ]

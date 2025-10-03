@@ -48,10 +48,7 @@ export class RainLines
             { label: 'visibleRatio', min: 0, max: 1, step: 0.001 },
             () =>
             {
-                if(this.game.weather.rain.value === 0)
-                    return 0
-
-                return Math.pow(this.game.weather.rain.value, 3) + 0.05
+                return Math.pow(this.game.weather.rain.value, 2)
             }
         )
 

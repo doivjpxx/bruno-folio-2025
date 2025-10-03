@@ -51,8 +51,7 @@ export class Floor
             const uvDim = min(min(uv().x, uv().y).mul(20), 1)
 
             const newPosition = positionLocal
-            newPosition.y.addAssign(terrainData.b.mul(-2).mul(uvDim))
-
+            newPosition.y.addAssign(terrainData.b.mul(-1.5).mul(uvDim))
 
             return newPosition
         })()
