@@ -130,6 +130,14 @@ export class Objects
                     _physicalDescription.type = 'kinematicPositionBased'
             }
 
+            // Restitution
+            if(typeof _model.userData.restitution !== 'undefined')
+                _physicalDescription.restitution = _model.userData.restitution
+
+            // Friction
+            if(typeof _model.userData.friction !== 'undefined')
+                _physicalDescription.friction = _model.userData.friction
+
             _model.name = name.replaceAll(cleanUpRegexp, '')
 
             // Colliders
@@ -165,6 +173,12 @@ export class Objects
                     collider.shape = 'ball'
                     collider.parameters = [ _child.scale.y * 0.5 ]
                 }
+
+                if(typeof _child.userData.restitution !== 'undefined')
+                    collider.restitution = _child.userData.restitution
+
+                if(typeof _child.userData.friction !== 'undefined')
+                    collider.friction = _child.userData.friction
 
                 // Collider found
                 if(collider.shape)

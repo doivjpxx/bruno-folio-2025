@@ -178,6 +178,8 @@ export class Physics
 
             if(typeof _physicalDescription.friction !== 'undefined')
                 colliderDescription = colliderDescription.setFriction(_physicalDescription.friction)
+            else if(typeof _colliderDescription.friction !== 'undefined')
+                colliderDescription = colliderDescription.setFriction(_colliderDescription.friction)
             else
                 colliderDescription = colliderDescription.setFriction(0.2)
 
@@ -188,6 +190,8 @@ export class Physics
                 
             if(typeof _physicalDescription.restitution !== 'undefined')
                 colliderDescription = colliderDescription.setRestitution(_physicalDescription.restitution)
+            else if(typeof _colliderDescription.restitution !== 'undefined')
+                colliderDescription = colliderDescription.setRestitution(_colliderDescription.restitution)
             else
                 colliderDescription = colliderDescription.setRestitution(0.15)
                 

@@ -149,7 +149,7 @@ export class Areas
                     },
                     {
                         // friction: child.userData.friction ?? 0.5,
-                        // restitution: child.userData.restitution ?? 0.1,
+                        // restitution: 1,
                         position: child.position,
                         rotation: child.quaternion,
                         sleeping: true,
