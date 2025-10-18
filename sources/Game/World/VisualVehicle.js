@@ -79,7 +79,6 @@ export class VisualVehicle
     setMainGroundTrack()
     {
         this.mainGroundTrack = this.game.tracks.add(new Track(1.5, 'g'))
-
     }
 
     setWheels()
