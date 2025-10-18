@@ -15,6 +15,7 @@ export class Ticker
         this.scale = 2
         this.deltaScaled = this.delta * this.scale
         this.elapsedScaled = 0
+        this.waits = []
 
         this.elapsedUniform = uniform(this.elapsed)
         this.deltaUniform = uniform(this.delta)
@@ -22,18 +23,6 @@ export class Ticker
         this.deltaScaledUniform = uniform(this.deltaScaled)
 
         this.events = new Events()
-        // this.setTick()
-    }
-
-    setTick()
-    {
-        const tick = (elapsed) =>
-        {
-            this.update(elapsed)
-
-            requestAnimationFrame(tick)
-        }
-        requestAnimationFrame(tick)
     }
 
     update(elapsed)
@@ -49,6 +38,24 @@ export class Ticker
         this.elapsedScaledUniform.value = this.elapsedScaled
         this.deltaScaledUniform.value = this.deltaScaled
 
+        for(let i = 0; i < this.waits.length; i++)
+        {
+            const wait = this.waits[i]
+            wait[0]--
+
+            if(wait[0] === 0)
+            {
+                wait[1]()
+                this.waits.splice(i, 1)
+                i--
+            }
+        }
+
         this.events.trigger('tick')
+    }
+
+    wait(frames, callback)
+    {
+        this.waits.push([ frames, callback ])
     }
 }

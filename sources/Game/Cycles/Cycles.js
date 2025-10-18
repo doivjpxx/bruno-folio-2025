@@ -156,7 +156,7 @@ export class Cycles
             if(newProgress >= punctualEvent.progress && this.progress < punctualEvent.progress)
             {
                 if(firstFrame)
-                    requestAnimationFrame(() =>
+                    this.game.ticker.wait(1, () =>
                     {
                         this.events.trigger(punctualEvent.name)
                     })
@@ -174,7 +174,7 @@ export class Cycles
             {
                 intervalEvent.inInverval = true
                 if(firstFrame)
-                    requestAnimationFrame(() =>
+                    this.game.ticker.wait(1, () =>
                     {
                         this.events.trigger(intervalEvent.name, [ intervalEvent.inInverval ])
                     })
@@ -185,7 +185,7 @@ export class Cycles
             {
                 intervalEvent.inInverval = false
                 if(firstFrame)
-                    requestAnimationFrame(() =>
+                    this.game.ticker.wait(1, () =>
                     {
                         this.events.trigger(intervalEvent.name, [ intervalEvent.inInverval ])
                     })

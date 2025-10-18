@@ -150,12 +150,9 @@ export class Game
         // this.monitoring = new Monitoring()
         this.world.initRest()
 
-        requestAnimationFrame(() =>
+        this.ticker.wait(3, () =>
         {
-            requestAnimationFrame(() =>
-            {
-                this.reveal.expose()
-            })
+            this.reveal.expose()
         })
     }
 }

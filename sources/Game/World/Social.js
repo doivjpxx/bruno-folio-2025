@@ -135,15 +135,15 @@ export class Social
             object.physical.body.setLinvel({ x: 0, y: 0, z: 0 })
             object.physical.body.setAngvel({ x: 0, y: 0, z: 0 })
             object.physical.body.wakeUp()
-            requestAnimationFrame(() =>
-            {
-                // object.physical.body.applyImpulse({
-                //     x: (Math.random() - 0.5) * this.fans.mass * 2,
-                //     y: Math.random() * this.fans.mass * 3,
-                //     z: this.fans.mass * 7
-                // }, true)
-                // object.physical.body.applyTorqueImpulse({ x: 0, y: 0, z: 0 }, true)
-            })
+            // this.game.ticker.wait(1, () =>
+            // {
+            //     object.physical.body.applyImpulse({
+            //         x: (Math.random() - 0.5) * this.fans.mass * 2,
+            //         y: Math.random() * this.fans.mass * 3,
+            //         z: this.fans.mass * 7
+            //     }, true)
+            //     object.physical.body.applyTorqueImpulse({ x: 0, y: 0, z: 0 }, true)
+            // })
 
             this.fans.currentIndex = (this.fans.currentIndex + 1) % this.fans.count
 

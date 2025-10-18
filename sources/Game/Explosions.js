@@ -46,7 +46,7 @@ export class Explosions
             {
                 // const point = direction.negate().setLength(0).add(position)
                 const point = position
-                requestAnimationFrame(() =>
+                this.game.ticker.wait(1, () =>
                 {
                     physicalObject.body.applyImpulseAtPoint(impulse, point, true)
                 })

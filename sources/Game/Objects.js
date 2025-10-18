@@ -217,7 +217,7 @@ export class Objects
         object.physical.body.setAngvel({ x: 0, y: 0, z: 0 }, false)
 
         // Wait a second and reactivate
-        requestAnimationFrame(() =>
+        this.game.ticker.wait(1, () =>
         {
             object.physical.body.setEnabled(true)
 

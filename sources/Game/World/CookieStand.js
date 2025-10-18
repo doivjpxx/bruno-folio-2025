@@ -417,7 +417,7 @@ export class CookieStand
         spawnPosition.z += Math.random() - 0.5
         object.physical.body.setTranslation(spawnPosition)
         object.physical.body.setEnabled(true)
-        requestAnimationFrame(() =>
+        this.game.ticker.wait(1, () =>
         {
             object.physical.body.applyImpulse({
                 x: (Math.random() - 0.5) * this.cookies.mass * 2,

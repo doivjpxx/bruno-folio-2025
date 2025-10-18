@@ -172,7 +172,7 @@ export class Bowling
                 this.ball.reset()
                 this.screen.reset()
 
-                requestAnimationFrame(() =>
+                this.game.ticker.wait(1, () =>
                 {
                     this.restartInteractivePoint.hide()
                 })
