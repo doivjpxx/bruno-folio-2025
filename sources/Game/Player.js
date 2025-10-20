@@ -30,6 +30,9 @@ export class Player
         this.setInputs()
         this.setUnstuck()
 
+        this.game.physicalVehicle.chassis.physical.initialState.position.x = respawn.position.x
+        this.game.physicalVehicle.chassis.physical.initialState.position.y = respawn.position.y
+        this.game.physicalVehicle.chassis.physical.initialState.position.z = respawn.position.z
         this.game.physicalVehicle.moveTo(respawn.position, respawn.rotation)
 
         this.game.ticker.events.on('tick', () =>
