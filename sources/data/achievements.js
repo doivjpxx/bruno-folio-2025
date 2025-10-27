@@ -154,7 +154,7 @@ export default
     ],
     [
         'strike',
-        'Strike!',
+        'F*** it, dude. Let\'s go bowling',
         'Accomplished a strike.',
         1
     ],

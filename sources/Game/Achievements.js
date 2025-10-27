@@ -15,8 +15,6 @@ export class Achievements
         this.setGlobalProgress()
         this.setReset()
 
-        this.globalProgress.update()
-
         const localAchievements = this.storage.get()
 
         for(const groupName in localAchievements)
@@ -29,6 +27,8 @@ export class Achievements
                 group.setProgress(progress, true)
             }
         }
+
+        this.globalProgress.update()
     }
 
     setStorage()
@@ -77,9 +77,16 @@ export class Achievements
         this.globalProgress.update = () =>
         {
             let achievedCount = 0
-            this.groups.forEach(_item => achievedCount += _item.achieved ? 1 : 0)
+            let totalCount = 0
+            this.groups.forEach(_group =>
+            {
+                for(const achievement of _group.items)
+                    achievedCount += achievement.achieved ? 1 : 0
+
+                totalCount++
+            })
             
-            this.globalProgress.total.textContent = this.groups.size
+            this.globalProgress.total.textContent = totalCount
             this.globalProgress.current.textContent = achievedCount
         }
     }
