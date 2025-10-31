@@ -70,6 +70,7 @@ export class Game
         this.resourcesLoader = new ResourcesLoader()
         this.resources = await this.resourcesLoader.load([
             [ 'respawnsReferencesModel', 'respawns/respawnsReferences.glb', 'gltf' ],
+            [ 'behindTheSceneStars',     'behindTheScene/stars.png',        'texture', (resource) => { resource.colorSpace = THREE.SRGBColorSpace; resource.minFilter = THREE.NearestFilter; resource.magFilter = THREE.NearestFilter; resource.generateMipmaps = false; resource.wrapS = THREE.RepeatWrapping; resource.wrapT = THREE.RepeatWrapping; } ],
         ])
         this.scene = new THREE.Scene()
         this.debug = new Debug()
@@ -136,7 +137,6 @@ export class Game
                 [ 'interactivePointsKeyIconEnterTexture',  'interactivePoints/interactivePointsKeyIconEnter.png',  'texture', (resource) => { resource.flipY = true; resource.minFilter = THREE.NearestFilter; resource.magFilter = THREE.NearestFilter; resource.generateMipmaps = false } ],
                 [ 'interactivePointsKeyIconATexture',      'interactivePoints/interactivePointsKeyIconA.png',      'texture', (resource) => { resource.flipY = true; resource.minFilter = THREE.NearestFilter; resource.magFilter = THREE.NearestFilter; resource.generateMipmaps = false } ],
                 [ 'jukeboxMusicNotes',                     'jukebox/jukeboxMusicNotes.png',                        'texture', (resource) => {  } ],
-                [ 'behindTheSceneStars',                   'behindTheScene/stars.png',                             'texture', (resource) => { resource.colorSpace = THREE.SRGBColorSpace; resource.minFilter = THREE.NearestFilter; resource.magFilter = THREE.NearestFilter; resource.generateMipmaps = false; resource.wrapS = THREE.RepeatWrapping; resource.wrapT = THREE.RepeatWrapping; } ],
                 [ 'achievementsGlyphsTexture',             'achievements/glyphs.png',                              'texture', (resource) => { resource.minFilter = THREE.LinearFilter; resource.magFilter = THREE.LinearFilter; resource.generateMipmaps = false; resource.wrapS = THREE.RepeatWrapping; } ],
             ],
             (toLoad, total) =>

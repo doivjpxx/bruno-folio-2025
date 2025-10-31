@@ -3,9 +3,10 @@ import { Game } from '../Game.js'
 import { Track } from '../Tracks.js'
 import { Trails } from '../Trails.js'
 import { remapClamp } from '../utilities/maths.js'
-import { mix, uniform } from 'three/tsl'
+import { cameraPosition, color, Fn, min, mix, normalWorld, positionViewDirection, positionWorld, screenCoordinate, texture, uniform, uv, vec2, vec3, vec4 } from 'three/tsl'
 import { clamp } from 'three/src/math/MathUtils.js'
 import gsap from 'gsap'
+import { MeshDefaultMaterial } from '../Materials/MeshDefaultMaterial.js'
 
 export class VisualVehicle
 {
@@ -16,6 +17,7 @@ export class VisualVehicle
         this.model = model
 
         this.setParts()
+        this.setPaints()
         this.setMainGroundTrack()
         this.setWheels()
         this.setBlinkers()
@@ -23,6 +25,8 @@ export class VisualVehicle
         this.setBoostTrails()
         this.setBoostAnimation()
         this.setScreenPosition()
+        
+        this.paints.changeTo('abyssal')
 
         this.tickCallback = () =>
         {
@@ -60,6 +64,7 @@ export class VisualVehicle
         this.parts = {}
 
         const searchList = [
+            'bodyPainted',
             'chassis',
             'blinkerLeft',
             'blinkerRight',
@@ -117,6 +122,119 @@ export class VisualVehicle
         this.game.materials.updateObject(this.parts.wheelContainer)
     }
 
+    setPaints()
+    {
+        this.paints = {}
+
+        this.paints.choices = {}
+        this.paints.choices.red = this.game.materials.getFromName('redGradient')
+        this.paints.choices.orange = this.game.materials.createGradient('orangeGradient', '#ff940d', '#af0071', this.game.materials.debugPanel?.addFolder({ title: 'orangeGradient' }))
+        this.paints.choices.white = this.game.materials.createGradient('whiteGradient', '#ffffff', '#b5b5b5', this.game.materials.debugPanel?.addFolder({ title: 'whiteGradient' }))
+        this.paints.choices.black = this.game.materials.createGradient('blackGradient', '#626262', '#262526', this.game.materials.debugPanel?.addFolder({ title: 'blackGradient' }))
+        
+        // Flames
+        {
+            const material = this.paints.choices.red.clone()
+            const baseOutput = material.outputNode
+            const colorA = uniform(color('#ff9c20'))
+            const colorB = uniform(color('#ff0000'))
+            const emissiveStrength = uniform(7.75)
+
+            material.outputNode = Fn(() =>
+            {
+                // Flames
+                {
+                    const newUv = uv(1).toVar()
+                    const uv3 = newUv.sub(vec2(0, this.game.ticker.elapsedScaledUniform.mul(-0.075))).mul(vec2(0.96 * 1.3, 0.35 * 1.3))
+                    const noise3 = texture(this.game.noises.voronoi, uv3).r
+
+                    const uv4 = newUv.sub(vec2(0, this.game.ticker.elapsedScaledUniform.mul(-0.041))).mul(vec2(1.28 * 1.3, 0.75 * 1.3))
+                    const noise4 = texture(this.game.noises.voronoi, uv4).r
+
+                    const noiseFinal = min(noise3, noise4)
+                    const stepTreshold = newUv.y.oneMinus()
+                    const flameMix = noiseFinal.step(stepTreshold)
+
+                    const flameColor = mix(colorA, colorB, newUv.y).mul(emissiveStrength)
+
+                    baseOutput.rgb.assign(mix(baseOutput.rgb, flameColor, flameMix))
+                }
+
+
+                return baseOutput
+            })()
+
+            this.paints.choices.flames = material
+
+            // Debug
+            if(this.game.debug.active && this.game.materials.debugPanel)
+            {
+                const debugPanel = this.game.materials.debugPanel.addFolder({
+                    title: 'flames',
+                    expanded: true,
+                })
+                this.game.debug.addThreeColorBinding(debugPanel, colorA.value, 'flamesColorA')
+                this.game.debug.addThreeColorBinding(debugPanel, colorB.value, 'flamesColorB')
+                debugPanel.addBinding(emissiveStrength, 'value', { label: 'emissiveStrength', min: 1, max: 10, step: 0.001 })
+            }
+        }
+        
+        // Abyssal
+        {
+            const material = new THREE.MeshBasicMaterial({ wireframe: false })
+            const fresnelColor = uniform(color('#6053ff'))
+            const fresnelIntensity = uniform(30)
+            const starsIntensity = uniform(10)
+
+            material.outputNode = Fn(() =>
+            {
+                const starsUv = screenCoordinate.div(256).fract()
+                const starsColor = texture(this.game.resources.behindTheSceneStars, starsUv).rgb.pow(2).mul(starsIntensity)
+				
+                const viewDirection = positionWorld.sub( cameraPosition ).normalize();
+                const fresnel = viewDirection.dot(normalWorld).remapClamp(-0.2, -0.4, 1, 0)
+                
+                const fresnelFinalColor = fresnelColor.mul(fresnelIntensity)
+                const finalColor = mix(starsColor, fresnelFinalColor, fresnel)
+
+                finalColor.assign(MeshDefaultMaterial.revealDiscardNodeBuilder(this.game, finalColor))
+
+                return vec4(finalColor, 1)
+            })()
+
+            this.paints.choices.abyssal = material
+
+            // Debug
+            if(this.game.debug.active && this.game.materials.debugPanel)
+            {
+                const debugPanel = this.game.materials.debugPanel.addFolder({
+                    title: 'abyssal',
+                    expanded: true,
+                })
+                this.game.debug.addThreeColorBinding(debugPanel, fresnelColor.value, 'fresnelColor')
+                debugPanel.addBinding(fresnelIntensity, 'value', { label: 'fresnelIntensity', min: 1, max: 40, step: 0.001 })
+                debugPanel.addBinding(starsIntensity, 'value', { label: 'starsIntensity', min: 1, max: 40, step: 0.001 })
+            }
+        }
+
+        this.paints.changeTo = (name = 'red') =>
+        {
+            const material = this.paints.choices[name]
+
+            if(!material)
+                return false
+
+            this.parts.bodyPainted.material = material
+
+            for(const wheel of this.wheels.items)
+            {
+                if(wheel.painted)
+                    wheel.painted.material = material
+            }
+        }
+        
+    }
+
     setMainGroundTrack()
     {
         this.mainGroundTrack = this.game.tracks.add(new Track(1.5, 'g'))
@@ -144,6 +262,8 @@ export class VisualVehicle
                     wheel.suspension = child
                 if(child.name.match(/^wheelCylinder/))
                     wheel.cylinder = child
+                if(child.name.match(/^wheelPainted/))
+                    wheel.painted = child
             })
             
             // Cylinder (actual wheel)
