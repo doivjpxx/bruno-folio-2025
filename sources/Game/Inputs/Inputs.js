@@ -75,6 +75,11 @@ export class Inputs
             this.end(`Gamepad.${key.name}`)
         })
 
+        this.gamepad.events.on('typeChange', (key) =>
+        {
+            this.updateMode(Inputs.MODE_GAMEPAD)
+        })
+
         this.gamepad.events.on('change', (key) =>
         {
             this.updateMode(Inputs.MODE_GAMEPAD)

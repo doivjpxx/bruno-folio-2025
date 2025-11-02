@@ -35,43 +35,6 @@ export class Reveal
         }, 9)
     }
 
-    setCircle()
-    {
-        this.circle = {}
-        
-        const radius = 3.5
-        const thickness = 0.05
-        this.circle.progress = 0
-        this.circle.smoothedProgress = uniform(0)
-
-        // Geometry
-        const geometry = new THREE.RingGeometry(radius - thickness, radius, 64, 1)
-
-        // Material
-        const material = new THREE.MeshBasicNodeMaterial()
-        material.outputNode = Fn(() =>
-        {
-            const angle = atan(positionGeometry.y, positionGeometry.x)
-            const angleProgress = angle.div(PI2).add(0.5).oneMinus()
-
-            this.circle.smoothedProgress.lessThan(angleProgress).discard()
-
-            return vec4(this.game.reveal.color.mul(this.game.reveal.intensity), 1)
-        })()
-
-        // Mesh
-        const mesh = new THREE.Mesh(geometry, material)
-        
-        mesh.position.copy(this.center)
-        mesh.position.y = 0.01
-        mesh.rotation.x = - Math.PI * 0.5
-        mesh.rotation.z = Math.PI * 0.5
-        
-        this.game.scene.add(mesh)
-
-        this.circle.mesh = mesh
-    }
-
     step(step)
     {
         const speedMultiplier = this.game.debug.active ? 4 : 1
@@ -128,16 +91,56 @@ export class Reveal
                 else
                 {
                     this.game.canvasElement.style.cursor = 'pointer'
-                    this.game.canvasElement.addEventListener('click', () =>
+
+                    this.game.inputs.addActions([
+                        { name: 'introStart', categories: [ 'intro' ], keys: [ 'Pointer.any', 'Gamepad.cross' ] },
+                    ])
+
+                    const deltaCursor = { x: 0, y: 0 }
+
+                    const callback = (action) =>
                     {
-                        this.game.canvasElement.style.cursor = 'default'
-                        this.step(1)
-                    }, { once: true })
+                        if(typeof action.value === 'object' && typeof action.value.x !== 'undefined')
+                        {
+                            // End
+                            if(action.trigger === 'start')
+                            {
+                                deltaCursor.x = 0
+                                deltaCursor.y = 0
+                            }
+                            else if(action.trigger === 'change')
+                            {
+                                if(this.game.inputs.pointer.isDown)
+                                {
+                                    deltaCursor.x += Math.abs(this.game.inputs.pointer.delta.x)
+                                    deltaCursor.y += Math.abs(this.game.inputs.pointer.delta.y)
+                                }
+                            }
+                            if(action.trigger === 'end')
+                            {
+                                const distance = Math.hypot(deltaCursor.x, deltaCursor.y)
+                                
+                                if(distance < 25)
+                                {
+                                    this.step(1)
+                                    this.game.inputs.events.off('introStart', callback)
+                                }
+                            }
+                        }
+                        else
+                        {
+                            this.step(1)
+                            this.game.inputs.events.off('introStart', callback)
+                        }
+                    }
+                    this.game.inputs.events.on('introStart', callback)
                 }
             })
         }
         else if(step = 1)
         {
+            this.game.canvasElement.style.cursor = 'default'
+
             // Reveal
             gsap.to(
                 this.distance,
@@ -159,6 +162,9 @@ export class Reveal
             // Inputs
             this.game.inputs.filters.clear()
             this.game.inputs.filters.add('wandering')
+
+            // View
+            this.game.view.focusPoint.isTracking = true
 
             // View
             gsap.to(

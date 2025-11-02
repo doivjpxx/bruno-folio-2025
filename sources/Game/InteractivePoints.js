@@ -183,7 +183,6 @@ export class InteractivePoints
         key.visible = false
         group.add(key)
 
-
         this.game.inputs.gamepad.events.on('typeChange', () =>
         {
             if(this.game.inputs.mode === Inputs.MODE_GAMEPAD)

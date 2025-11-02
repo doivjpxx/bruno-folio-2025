@@ -107,7 +107,6 @@ export class Game
         // Load rest of resources
         const resourcesPromise = this.resourcesLoader.load(
             [
-                [ 'introClickTexture',                     'intro/click.png',                                      'texture' ],
                 [ 'foliageTexture',                        'foliage/foliageSDF.png',                               'texture' ],
                 [ 'bushesReferences',                      'bushes/bushesReferences.glb',                          'gltf'    ],
                 [ 'vehicle',                               'vehicle/default.glb',                                  'gltf'    ],

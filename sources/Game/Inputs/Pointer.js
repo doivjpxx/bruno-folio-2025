@@ -114,7 +114,7 @@ export class Pointer
 
             this.upcomingTouches = [ ..._event.touches ]
 
-            if(this.touches.length === 0 || this.touches.length === 1)
+            if(this.upcomingTouches.length === 0 || this.upcomingTouches.length === 1)
                 this.upcomingDown = false
         })
 

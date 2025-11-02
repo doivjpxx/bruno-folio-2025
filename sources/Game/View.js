@@ -549,7 +549,7 @@ export class View
     setMapControls()
     {
         this.game.inputs.addActions([
-            { name: 'viewMapPointer', categories: [ 'wandering' ], keys: [ 'Pointer.any' ] },
+            { name: 'viewMapPointer', categories: [ 'intro', 'wandering' ], keys: [ 'Pointer.any' ] },
         ])
 
         this.game.inputs.events.on('viewMapPointer', (action) =>

@@ -2,6 +2,7 @@ import * as THREE from 'three/webgpu'
 import { Game } from '../Game.js'
 import { atan, Fn, PI, PI2, positionGeometry, texture, uniform, vec3, vec4 } from 'three/tsl'
 import gsap from 'gsap'
+import { Inputs } from '../Inputs/Inputs.js'
 
 export class IntroLoader
 {
@@ -91,16 +92,68 @@ export class IntroLoader
         const scale = 1.3
         const geometry = new THREE.PlaneGeometry(2 * scale, 1 * scale)
 
-        // Material
-        const material = new THREE.MeshBasicNodeMaterial()
-        material.outputNode = Fn(() =>
+        // Texture
+        const textures = new Map()
+        const updateTexture = async () =>
         {
-            const clickMask = texture(this.game.resources.introClickTexture).r
-            clickMask.lessThan(0.5).discard()
-            return vec4(1)
-        })()
+            // Define name
+            let name = 'mouseKeyboard'
+            
+            if(this.game.inputs.mode === Inputs.MODE_GAMEPAD)
+            {
+                if(this.game.inputs.gamepad.type === 'xbox')
+                {
+                    name = 'gamepadXbox'
+                }
+                else
+                {
+                    name = 'gamepadPlaystation'
+                }
+            }
+            else if(this.game.inputs.mode === Inputs.MODE_TOUCH)
+            {
+                name = 'touch'
+            }
+
+            // Load, set and save texture
+            let texture = textures.get(name)
+            if(!texture)
+            {
+                const resourceName = `introLabel${name}`
+                const resourcePath = `intro/${name}Label.png`
+                const resources = await this.game.resourcesLoader.load([
+                    [ resourceName, resourcePath, 'texture' ],
+                ])
+                texture = resources[resourceName]
+                textures.set(name, texture)
+            }
+
+            // Update material and mesh
+            material.alphaMap = texture
+            material.needsUpdate = true
+            mesh.visible = true
+        }
+
+        updateTexture()
+
+        // Material
+        const material = new THREE.MeshBasicNodeMaterial({
+            alphaTest: 0.5,
+            transparent: true
+        })
+
+        this.game.inputs.gamepad.events.on('typeChange', () =>
+        {
+            updateTexture()
+        })
+
+        this.game.inputs.events.on('modeChange', () =>
+        {
+            updateTexture()
+        })
 
         const mesh = new THREE.Mesh(geometry, material)
+        mesh.visible = false
         mesh.position.copy(this.center)
         mesh.position.x += 3.5
         mesh.position.z -= 1
@@ -119,7 +172,7 @@ export class IntroLoader
                 {
                     scale: 1,
                     duration: 2 / speedMultiplier,
-                    delay: 2 / speedMultiplier,
+                    delay: 1 / speedMultiplier,
                     ease: 'elastic.out(0.5)',
                     overwrite: true,
                     onUpdate: () =>
