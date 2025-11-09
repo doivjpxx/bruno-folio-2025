@@ -1,3 +1,4 @@
+import * as THREE from 'three/webgpu'
 import gsap from 'gsap'
 import { Game } from '../Game.js'
 import { InstancedGroup } from '../InstancedGroup.js'
@@ -25,7 +26,7 @@ export class ExplosiveCrates
         // Create instanced group
         this.instancedGroup = new InstancedGroup(this.references, base, true)
 
-        this.list = []
+        this.items = []
         
         let i = 0
         for(const reference of this.references)
@@ -33,15 +34,15 @@ export class ExplosiveCrates
             const crate = {}
             crate.id = i
             crate.isSleeping = true
-            crate.position = reference.clone()
+            crate.reference = reference.clone()
             crate.object = this.game.objects.add(
                 {
                     model: reference,
                 },
                 {
                     type: 'dynamic',
-                    position: reference.position,
-                    rotation: reference.quaternion,
+                    position: reference.position.clone(),
+                    rotation: reference.quaternion.clone(),
                     friction: 0.7,
                     mass: 0.02,
                     sleeping: true,
@@ -50,7 +51,7 @@ export class ExplosiveCrates
                 },
             )
 
-            this.list.push(crate)
+            this.items.push(crate)
 
             i++
         }
@@ -68,42 +69,59 @@ export class ExplosiveCrates
         this.sounds = {}
 
         // Click sound
-        this.sounds.click = this.game.audio.register(
-            'click',
+        this.sounds.triggerClick = this.game.audio.register(
+            'triggerClick',
             {
                 path: 'sounds/clicks/Source Metal Clicks Delicate Light Sharp Clip Mid 07.mp3',
                 autoplay: false,
                 loop: false,
                 volume: 0.4,
                 antiSpam: 0.1,
-                playBinding: (item) =>
+                positions: new THREE.Vector3(),
+                playBinding: (item, coordinates) =>
                 {
-                    item.volume = 0.4 + Math.random() * 0.2
+                    item.positions[0].copy(coordinates)
+                    item.volume = 1
                     item.rate = 0.7 + Math.random() * 1.3
                 }
             }
         )
 
-        this.sounds.explosion = this.game.audio.register(
-            'explosion',
-            {
-                path: 'sounds/explosions/Explosion with Debris 01.mp3',
-                autoplay: false,
-                loop: false,
-                volume: 0.4,
-                antiSpam: 0.2,
-                playBinding: (item) =>
-                {
-                    item.volume = 0.35 + Math.random() * 0.4
-                    item.rate = 0.6 + Math.random() * 4
-                }
-            }
-        )
+        const paths = [
+            'sounds/explosions/SmallImpactMediumE PE281202.mp3',
+            'sounds/explosions/SmallImpactMediumE PE281203.mp3'
+        ]
+
+        this.sounds.explosions = []
+
+        for(const path of paths)
+        {
+            this.sounds.explosions.push(
+                this.game.audio.register(
+                    'explosion',
+                    {
+                        path: path,
+                        autoplay: false,
+                        loop: false,
+                        volume: 0.4,
+                        antiSpam: 0.2,
+                        positions: new THREE.Vector3(),
+                        distanceFade: 25,
+                        playBinding: (item, coordinates) =>
+                        {
+                            item.positions[0].copy(coordinates)
+                            item.volume = 1
+                            item.rate = 0.9 + Math.random() * 0.3
+                        }
+                    }
+                )
+            )
+        }
     }
 
     update()
     {
-        for(const crate of this.list)
+        for(const crate of this.items)
         {
             // Sleeping state changed
             const isSleeping = crate.object.physical.body.isSleeping() || !crate.object.physical.body.isEnabled()
@@ -111,12 +129,12 @@ export class ExplosiveCrates
             {
                 if(!isSleeping)
                 {
-                    this.sounds.click.play()
+                    this.sounds.triggerClick.play(crate.reference.position)
 
                     gsap.delayedCall(0.4, () =>
                     {
                         // Sound
-                        this.sounds.explosion.play()
+                        this.sounds.explosions[Math.floor(Math.random() * this.sounds.explosions.length)].play(crate.reference.position)
 
                         // Explode
                         this.game.world.fireballs.create(crate.object.physical.body.translation())
@@ -136,7 +154,7 @@ export class ExplosiveCrates
 
     reset()
     {
-        for(const crate of this.list)
+        for(const crate of this.items)
             this.game.objects.resetObject(crate.object)
     }
 }

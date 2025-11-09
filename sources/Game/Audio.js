@@ -22,7 +22,8 @@ export class Audio
     {
         this.setMusic()
         this.setAmbiants()
-        // this.music.play()
+        this.setPunctuals()
+        this.music.play()
     }
 
     register(name, options = {})
@@ -39,9 +40,13 @@ export class Audio
                 console.error(`Audio > Load error > ${options.path}`, options)
             }
         })
+        item.positions = options.positions ?? null
+        if(item.positions !== null && !(item.positions instanceof Array))
+            item.positions = [ item.positions ]
+        item.distanceFade = options.distanceFade ?? null
         item.rate = options.rate ?? 1
         item.volume = options.volume ?? 0.5
-        item.antiSpam = options.antiSpam ?? 0.5
+        item.antiSpam = options.antiSpam ?? 0.1
         item.lastPlay = -Infinity
         item.tickBinding = options.tickBinding ?? null
         item.playBinding = options.playBinding ?? null
@@ -58,7 +63,7 @@ export class Audio
             // Play binding
             if(typeof item.playBinding === 'function')
                 item.playBinding(item, ...parameters)
-
+                
             // Play
             item.howl.play()
 
@@ -82,7 +87,7 @@ export class Audio
     setMusic()
     {
         this.music = new Howl({
-            src: ['sounds/musics/scarborough-fair-dance_main-full.mp3'],
+            src: ['sounds/musics/she-moved-through-the-fair-(celtic)_main-full.mp3'],
             pool: 0,
             autoplay: false,
             loop: true,
@@ -292,6 +297,86 @@ export class Audio
                 }
             }
         )
+
+        // Project Area + Cookie Area
+        {
+            const positions = []
+            if(this.game.world.areas.cookieStand)
+                positions.push(this.game.world.areas.cookieStand.references.get('spawner')[0].position)
+            if(this.game.world.areas.projects)
+                positions.push(this.game.world.areas.projects.references.get('oven')[0].position)
+
+            if(positions.length)
+            {
+                this.game.audio.register(
+                    'ovenFire',
+                    {
+                        path: 'sounds/burning/Mountain Audio - Fire Burning in a Wood Stove 1.mp3',
+                        autoplay: true,
+                        loop: true,
+                        volume: 0.4,
+                        positions: positions,
+                        distanceFade: 13,
+                    }
+                )
+            }
+        }
+
+        // Lab Area + Bonfire Area
+        {
+            const positions = []
+            if(this.game.world.areas.lab)
+                positions.push(this.game.world.areas.lab.references.get('fire')[0].position)
+
+            if(positions.length)
+            {
+                this.game.audio.register(
+                    'campfire',
+                    {
+                        path: 'sounds/burning/Fire Burning.mp3',
+                        autoplay: true,
+                        loop: true,
+                        volume: 0.4,
+                        positions: positions,
+                        distanceFade: 13,
+                    }
+                )
+            }
+        }
+    }
+
+    setPunctuals()
+    {
+        this.register(
+            'slide',
+            {
+                path: 'sounds/mecanism/slide.mp3',
+                autoplay: false,
+                volume: 0.18
+            }
+        )
+
+        this.register(
+            'click',
+            {
+                path: 'sounds/mecanism/click.mp3',
+                autoplay: false,
+                volume: 0.25,
+                playBinding: (item, isOpen = true) =>
+                {
+                    item.rate = isOpen ? 1 : 0.6
+                }
+            }
+        )
+
+        this.register(
+            'assemble',
+            {
+                path: 'sounds/mecanism/assemble.mp3',
+                autoplay: false,
+                volume: 0.3
+            }
+        )
     }
 
     setMuteToggle()
@@ -345,13 +430,49 @@ export class Audio
         {
             for(const item of group)
             {
+                // Apply tick binding
                 if(typeof item.tickBinding === 'function')
                 {
                     item.tickBinding(item)
                 }
 
+                // Positional and distance fade
+                let distanceFadeMultiplier = 1
+                if(item.positions && item.howl.playing())
+                {
+                    let closestDistance = Infinity
+                    let closestPosition = null
+
+                    for(const position of item.positions)
+                    {
+                        const distance = position.distanceTo(this.game.view.focusPoint.position)
+
+                        if(distance < closestDistance)
+                        {
+                            closestDistance = distance
+                            closestPosition = position
+                        }
+                    }
+
+                    const cameraRelativePosition = closestPosition.clone()
+                    cameraRelativePosition.applyMatrix4(this.game.view.camera.matrixWorldInverse)
+                    cameraRelativePosition.normalize()
+                    cameraRelativePosition.z *= 0.1
+
+                    if(item.distanceFade)
+                    {
+                        distanceFadeMultiplier = remapClamp(closestDistance, 0, item.distanceFade, 1, 0)
+                    }
+
+                    if(distanceFadeMultiplier > 0)
+                        item.howl.pos(cameraRelativePosition.x, cameraRelativePosition.y, cameraRelativePosition.z)
+                }
+
+                // Rate (apply global too)
                 item.howl.rate(item.rate * this.globalRate)
-                item.howl.volume(item.volume)
+
+                // Volume
+                item.howl.volume(item.volume * distanceFadeMultiplier)
             }
         })
     }

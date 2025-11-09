@@ -22,6 +22,7 @@ export class CookieStandArea extends Area
             })
         }
 
+        this.setSound()
         this.setBlower()
         this.setBanner()
         this.setParticles()
@@ -36,6 +37,27 @@ export class CookieStandArea extends Area
         {
             this.update()
         })
+    }
+
+    setSound()
+    {
+        this.sounds = {}
+
+        this.sounds.ding = this.game.audio.register(
+            'ding',
+            {
+                path: 'sounds/ding/Cash Register 03.mp3',
+                autoplay: false,
+                loop: false,
+                volume: 0.4,
+                antiSpam: 0.15,
+                playBinding: (item) =>
+                {
+                    item.volume = 0.3 + Math.random() * 0.2
+                    item.rate = 1 + Math.random() * 0.05
+                }
+            }
+        )
     }
 
     setBlower()
@@ -449,6 +471,9 @@ export class CookieStandArea extends Area
 
         // Counter
         this.counter.add()
+
+        // Sound
+        this.sounds.ding.play()
 
         // Actual cookie
         document.cookie = `acceptedCookies=${++this.actualCookies.count}`

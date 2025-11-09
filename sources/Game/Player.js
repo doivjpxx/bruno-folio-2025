@@ -57,7 +57,7 @@ export class Player
         this.sounds.suspensions = this.game.audio.register(
             'suspensions',
             {
-                path: 'sounds/suspensions/Grotto Gas Canister 4.mp3',
+                path: 'sounds/suspensions/Robotic_Lifeforms_2_-_Air_Source_-_Piston_Studio_Chair_07.mp3',
                 autoplay: false,
                 loop: false,
                 volume: 0.4,
@@ -65,11 +65,26 @@ export class Player
                 playBinding: (item, count) =>
                 {
                     item.volume = 0.1 + count * 0.05
-                    item.rate = 1.2 + Math.random() * 0.8
+                    item.rate = 0.9 + Math.random() * 0.2
                 }
             }
         )
-        this.sounds.spring = this.game.audio.register(
+        this.sounds.spring1 = this.game.audio.register(
+            'spring',
+            {
+                path: 'sounds/springs/HandleSqueak_BW.60329.mp3',
+                autoplay: false,
+                loop: false,
+                volume: 0.4,
+                antiSpam: 1,
+                playBinding: (item, count) =>
+                {
+                    item.volume = 0.05 + count * 0.02
+                    item.rate = 1 + Math.random() * 0.1
+                }
+            }
+        )
+        this.sounds.spring2 = this.game.audio.register(
             'spring',
             {
                 path: 'sounds/springs/SpringMetalMovements_1u54Y_01.mp3',
@@ -79,8 +94,8 @@ export class Player
                 antiSpam: 0.2,
                 playBinding: (item, count) =>
                 {
-                    item.volume = 0.1 + count * 0.1
-                    item.rate = 0.9 + Math.random() * 1
+                    item.volume = 0.05 + count * 0.1
+                    item.rate = 0.9 + Math.random() * 0.4
                 }
             }
         )
@@ -450,7 +465,10 @@ export class Player
 
         // Sound
         if(this.game.physicalVehicle.wheels.justTouchedCount > 1)
-            this.sounds.spring.play(this.game.physicalVehicle.wheels.justTouchedCount)
+        {
+            this.sounds.spring1.play(this.game.physicalVehicle.wheels.justTouchedCount)
+            this.sounds.spring2.play(this.game.physicalVehicle.wheels.justTouchedCount)
+        }
 
         // Time played
         this.timePlayed += this.game.ticker.delta

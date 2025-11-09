@@ -34,6 +34,7 @@ export class LabArea extends Area
         
         this.state = LabArea.STATE_CLOSED
 
+        this.setSounds()
         this.setInteractivePoint()
         this.setInputs()
         this.setCinematic()
@@ -52,7 +53,7 @@ export class LabArea extends Area
         this.setCauldron()
         this.setAchievement()
 
-        this.changeProject(0)
+        this.changeProject(0, null, true)
         this.scroller.progress = this.scroller.targetProgress
 
         // Debug
@@ -66,6 +67,29 @@ export class LabArea extends Area
         {
             this.update()
         })
+    }
+
+    setSounds()
+    {
+        this.sounds = {}
+        
+        this.sounds.scroll = this.game.audio.register(
+            'mecanismScroll',
+            {
+                path: 'sounds/mecanism/05947 light wooden cart riding on cobblestone - looping.mp3',
+                autoplay: true,
+                loop: true,
+                volume: 0.5,
+                positions: this.references.get('mecanism')[0].position,
+                tickBinding: (item) =>
+                {
+                    const absoluteSpeed = Math.abs(this.scroller.speed)
+                    item.volume = remapClamp(absoluteSpeed, 0, 6, 0, 0.5)
+                    item.rate = remapClamp(absoluteSpeed, 0, 6, 0.95, 1.05)
+                }
+            }
+        )
+
     }
 
     setInteractivePoint()
@@ -752,6 +776,7 @@ export class LabArea extends Area
         this.scroller.targetProgress = 0
         this.scroller.wheelSensitivity = 0.1
         this.scroller.easing = 3
+        this.scroller.speed = 0
 
         // Vertical chain material
         {
@@ -978,6 +1003,7 @@ export class LabArea extends Area
             this.scroller.gearB.rotation.x = - this.scroller.gearA.rotation.x * (6 / 12)
             this.scroller.gearC.rotation.x = - this.scroller.gearB.rotation.x * (6 / 12)
 
+
             for(const mini of this.scroller.minis.items)
             {
                 mini.group.position.y = safeMod(mini.y - this.scroller.offset, this.scroller.minis.total) - 1
@@ -1013,8 +1039,11 @@ export class LabArea extends Area
 
         this.game.ticker.events.on('tick', () =>
         {
-            this.scroller.progress += (this.scroller.targetProgress - this.scroller.progress) * this.game.ticker.deltaScaled * this.scroller.easing
+            const delta = (this.scroller.targetProgress - this.scroller.progress) * this.game.ticker.deltaScaled * this.scroller.easing
+            this.scroller.progress += delta
             this.scroller.offset = this.scroller.progress * this.scroller.minis.inter
+
+            this.scroller.speed = delta / this.game.ticker.delta
 
             this.scroller.animate()
         })
@@ -1394,7 +1423,7 @@ export class LabArea extends Area
         this.blackBoard.active = false
     }
 
-    changeProject(index = 0, direction = null)
+    changeProject(index = 0, direction = null, silent = false)
     {
         // Loop index
         let loopIndex = index
@@ -1426,6 +1455,14 @@ export class LabArea extends Area
 
         // Scroller
         this.scroller.update(this.navigation.index)
+
+        // Sounds
+        if(!silent)
+        {
+            this.game.audio.groups.get('click')[0].play()
+            this.game.audio.groups.get('slide')[0].play()
+            this.game.audio.groups.get('assemble')[0].play()
+        }
 
         // Achievements
         if(this.state === LabArea.STATE_OPEN)

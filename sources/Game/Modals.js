@@ -135,6 +135,9 @@ export class Modals
         // Currently closed => Open immediately
         else if(this.state === Modals.CLOSED)
         {
+            // Sound
+            this.game.audio.groups.get('click')[0].play(true)
+
             this.element.classList.add('is-displayed')
             item.element.classList.add('is-displayed')
 
@@ -169,6 +172,9 @@ export class Modals
     {
         if(this.state === Modals.CLOSING || this.state === Modals.CLOSED)
             return
+
+        // Sound
+        this.game.audio.groups.get('click')[0].play(false)
 
         this.element.classList.remove('is-visible')
 

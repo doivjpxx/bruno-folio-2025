@@ -13,6 +13,7 @@ export class AchievementsArea extends Area
     {
         super(references)
 
+        this.setSounds()
         this.setWaterfall()
         this.setPillar()
         this.setInteractivePoint()
@@ -22,6 +23,23 @@ export class AchievementsArea extends Area
         {
             this.update()
         }, 9)
+    }
+
+    setSounds()
+    {
+        this.sounds = {}
+
+        this.sounds.chimers = this.game.audio.register(
+            'chimers',
+            {
+                path: 'sounds/magic/Mountain Audio - Small Chimes - Loop.mp3',
+                autoplay: true,
+                loop: true,
+                volume: 0.15,
+                positions: this.references.get('pillar')[0].position,
+                distanceFade: 20
+            }
+        )
     }
 
     setWaterfall()

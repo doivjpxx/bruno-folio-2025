@@ -22,6 +22,7 @@ export class BehindTheSceneArea extends Area
 
         this.center = this.references.get('center')[0].position
 
+        this.setSounds()
         this.setSlabs()
         this.setInteractivePoint()
         this.setAchievement()
@@ -30,6 +31,23 @@ export class BehindTheSceneArea extends Area
         {
             this.update()
         }, 9)
+    }
+
+    setSounds()
+    {
+        this.sounds = {}
+
+        this.sounds.chimers = this.game.audio.register(
+            'chimers',
+            {
+                path: 'sounds/magic/Environmental Loop Scifi Bright Glassy Wandering Tones Layered 02.mp3',
+                autoplay: true,
+                loop: true,
+                volume: 0.15,
+                positions: this.references.get('interactivePoint')[0].position,
+                distanceFade: 20
+            }
+        )
     }
 
     setSlabs()

@@ -80,12 +80,16 @@ export class Lightnings
                             path: path,
                             autoplay: false,
                             loop: false,
-                            volume: 0.4,
+                            volume: 1,
                             antiSpam: 0.2,
-                            playBinding: (item, distance) =>
+                            positions: new THREE.Vector3(),
+                            playBinding: (item, coordinates) =>
                             {
-                                const distanceVolumeEffect = Math.pow(mathRemapClamp(distance, 0, 20, 1, 0), 2)
-                                item.volume = 0.1 + Math.random() * 0.1 + distanceVolumeEffect * 0.6
+                                const distance = Math.hypot(coordinates.x - this.game.player.position2.x, coordinates.z - this.game.player.position2.y)
+                                item.positions[0].copy(coordinates)
+            
+                                // const distanceVolumeEffect = Math.pow(mathRemapClamp(distance, 0, 20, 1, 0), 2)
+                                // item.volume = 0.1 + Math.random() * 0.1 + distanceVolumeEffect * 0.6
 
                                 const distanceRateEffect = mathRemapClamp(distance, 0, 20, 0, - 0.3)
                                 item.rate = 1.3 + Math.random() * 0.1 + distanceRateEffect
@@ -419,10 +423,8 @@ export class Lightnings
 
         gsap.delayedCall(this.anticipationParticles.duration, () =>
         {
-            const distance = Math.hypot(coordinates.x - this.game.player.position2.x, coordinates.z - this.game.player.position2.y)
-            
             // Sound
-            this.sounds.near[Math.floor(Math.random() * this.sounds.near.length)].play(distance)
+            this.sounds.near[Math.floor(Math.random() * this.sounds.near.length)].play(coordinates)
 
             // Game explosion
             this.game.explosions.explode(coordinates, 7, 4, true)

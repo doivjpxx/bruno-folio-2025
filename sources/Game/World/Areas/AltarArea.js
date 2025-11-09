@@ -25,6 +25,7 @@ export class AltarArea extends Area
         this.color = uniform(color('#ff544d'))
         this.emissive = uniform(8)
 
+        this.setSounds()
         this.setBeam()
         this.setBeamParticles()
         this.setCounter()
@@ -48,6 +49,23 @@ export class AltarArea extends Area
             this.game.debug.addThreeColorBinding(this.debugPanel, this.color.value, 'color')
             this.debugPanel.addBinding(this.emissive, 'value', { label: 'emissive', min: 0, max: 10, step: 0.1 })
         }
+    }
+
+    setSounds()
+    {
+        this.sounds = {}
+
+        this.sounds.chimers = this.game.audio.register(
+            'chimers',
+            {
+                path: 'sounds/magic/Ghostly Whisper Background Loop 9.mp3',
+                autoplay: true,
+                loop: true,
+                volume: 0.15,
+                positions: this.references.get('altar')[0].position,
+                distanceFade: 20
+            }
+        )
     }
 
     setBeam()

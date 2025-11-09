@@ -33,6 +33,7 @@ export class ProjectsArea extends Area
         
         this.state = ProjectsArea.STATE_CLOSED
 
+        this.setSounds()
         this.setInteractivePoint()
         this.setInputs()
         this.setCinematic()
@@ -54,7 +55,7 @@ export class ProjectsArea extends Area
         this.setAnvil()
         this.setAchievement()
 
-        this.changeProject(0)
+        this.changeProject(0, ProjectsArea.DIRECTION_NEXT, false, true)
 
         // Debug
         if(this.game.debug.active)
@@ -67,6 +68,30 @@ export class ProjectsArea extends Area
         {
             this.update()
         })
+    }
+
+    setSounds()
+    {
+        this.sounds = {}
+
+
+        this.sounds.anvil = this.game.audio.register(
+            'anvil',
+            {
+                path: 'sounds/anvil/METLImpt_Anvil Single Hammer Strike Hammers_GENHD1-01372.mp3',
+                autoplay: false,
+                loop: false,
+                volume: 0.5,
+                antiSpam: 0.1,
+                positions: this.references.get('anvil')[0].position,
+                distanceFade: 18,
+                playBinding: (item) =>
+                {
+                    item.volume = 0.1 + Math.random() * 0.1
+                    item.rate = 1 + Math.random() * 0.02
+                }
+            }
+        )
     }
 
     setInteractivePoint()
@@ -1272,6 +1297,8 @@ export class ProjectsArea extends Area
     setAnvil()
     {
         this.anvil = {}
+        this.anvil.frequency = 1
+        this.anvil.loopTime = 0
         
         // Hammer
         this.anvil.hammer = this.references.get('hammer')[0]
@@ -1479,7 +1506,7 @@ export class ProjectsArea extends Area
         this.blackBoard.active = false
     }
 
-    changeProject(index = 0, direction = ProjectsArea.DIRECTION_NEXT, firstImage = false)
+    changeProject(index = 0, direction = ProjectsArea.DIRECTION_NEXT, firstImage = false, silent = false)
     {
         // Loop index
         let loopIndex = index
@@ -1509,14 +1536,21 @@ export class ProjectsArea extends Area
         else
             imageIndex = direction === ProjectsArea.DIRECTION_NEXT ? 0 : this.navigation.current.images.length - 1
 
-        this.changeImage(imageIndex, direction)
+        // Sound
+        if(!silent)
+        {
+            this.game.audio.groups.get('click')[0].play()
+            this.game.audio.groups.get('assemble')[0].play()
+        }
+
+        this.changeImage(imageIndex, direction, silent)
 
         // Achievements
         if(this.state === ProjectsArea.STATE_OPEN)
             this.game.achievements.setProgress('projects', this.navigation.current.title)
     }
 
-    changeImage(imageIndex = 0, direction = null)
+    changeImage(imageIndex = 0, direction = null, silent = false)
     {
         if(direction === null)
             direction = imageIndex > this.images.index ? ProjectsArea.DIRECTION_NEXT : ProjectsArea.DIRECTION_PREVIOUS
@@ -1526,6 +1560,13 @@ export class ProjectsArea extends Area
         // Update components
         this.images.update(direction)
         this.pagination.update()
+
+        // Sounds
+        if(!silent)
+        {
+            this.game.audio.groups.get('click')[0].play()
+            this.game.audio.groups.get('slide')[0].play()
+        }
     }
 
     update()
@@ -1538,6 +1579,14 @@ export class ProjectsArea extends Area
         this.grinder.rotation.z = - this.game.ticker.elapsedScaled * 0.75
 
         // Anvil
-        this.anvil.hammer.rotation.z = Math.pow(1 - Math.abs(Math.cos(this.game.ticker.elapsedScaled * 1)), 5) - 1
+        const time = this.game.ticker.elapsedScaled * this.anvil.frequency + Math.PI * 0.25
+        this.anvil.hammer.rotation.z = Math.pow(1 - Math.abs(Math.sin(time)), 5) - 1
+
+        // Anvil sound
+        const loopTime = ((time) / Math.PI) % 1
+        if(loopTime < this.anvil.loopTime)
+            this.sounds.anvil.play()
+
+        this.anvil.loopTime = loopTime
     }
 }
