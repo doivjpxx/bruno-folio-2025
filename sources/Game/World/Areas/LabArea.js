@@ -1182,7 +1182,7 @@ export class LabArea extends Area
             mesh.material = material
         }
 
-        this.game.dayCycles.events.on('lights', (inInterval) =>
+        this.game.dayCycles.events.on('night', (inInterval) =>
         {
             if(inInterval)
             {

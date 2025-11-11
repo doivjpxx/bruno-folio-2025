@@ -69,6 +69,21 @@ export class Player
                 }
             }
         )
+        this.sounds.honk = this.game.audio.register(
+            'honk',
+            {
+                path: 'sounds/honk/Car Horn Honking v1.mp3',
+                autoplay: false,
+                loop: false,
+                volume: 0.4,
+                antiSpam: 0.1,
+                playBinding: (item, count) =>
+                {
+                    // item.volume = 0.25 + count * 0.05
+                    item.rate = 1 + Math.random() * 0.01
+                }
+            }
+        )
         this.sounds.spring1 = this.game.audio.register(
             'spring',
             {
@@ -96,6 +111,35 @@ export class Player
                 {
                     item.volume = 0.05 + count * 0.1
                     item.rate = 0.9 + Math.random() * 0.4
+                }
+            }
+        )
+        this.sounds.respawn = this.game.audio.register(
+            'respawnIn',
+            {
+                path: 'sounds/tears/Napkin Tear 2.mp3',
+                autoplay: false,
+                loop: false,
+                volume: 0.15,
+                playBinding: (item, count) =>
+                {
+                    // item.volume = 0.05 + count * 0.1
+                    // item.rate = 0.9 + Math.random() * 0.4
+                }
+            }
+        )
+        this.sounds.respawnReverse = this.game.audio.register(
+            'respawnOut',
+            {
+                path: 'sounds/tears/Napkin Tear 2-reverse.mp3',
+                autoplay: false,
+                loop: false,
+                volume: 0.15,
+                rate: 0.8,
+                playBinding: (item, count) =>
+                {
+                    // item.volume = 0.05 + count * 0.1
+                    // item.rate = 0.9 + Math.random() * 0.4
                 }
             }
         )
@@ -243,6 +287,9 @@ export class Player
                 if(this.game.physicalVehicle.upsideDown.active)
                 {
                     this.game.physicalVehicle.flip.jump()
+                    
+                    // Sound
+                    this.sounds.suspensions.play(4)
 
                     // Achievement
                     if(this.game.physicalVehicle.upsideDown.ratio > 0.75)
@@ -324,11 +371,20 @@ export class Player
 
     respawn(respawnName = null, callback = null)
     {
+        gsap.delayedCall(0.2, () =>
+        {
+            this.sounds.respawn.play()
+        })
         this.game.overlay.show(() =>
         {
             if(typeof callback === 'function')
                 callback()
             
+            gsap.delayedCall(0.8, () =>
+            {
+                this.sounds.respawnReverse.play()
+            })
+
             // Find respawn
             let respawn = respawnName ? this.game.respawns.getByName(respawnName) : this.game.respawns.getClosest(this.position)
 
@@ -358,7 +414,21 @@ export class Player
 
     honk()
     {
-        console.log('honk')
+        // Suspensions
+        const randomWheelIndex = Math.floor(Math.random() * 4)
+        const previousState = this.suspensions[randomWheelIndex]
+        this.suspensions[ randomWheelIndex ] = 'mid'
+
+        gsap.delayedCall(0.15, () =>
+        {
+            if(this.suspensions[ randomWheelIndex ] === 'mid')
+            {
+                this.suspensions[ randomWheelIndex ] = previousState
+            }
+        })
+
+        // Sound
+        this.sounds.honk.play()
 
         // Achievement
         this.game.achievements.addProgress('honk')

@@ -10,7 +10,7 @@ export class Physics
         this.game = Game.getInstance()
 
         this.world = new this.game.RAPIER.World({ x: 0.0, y: -9.81, z: 0.0 })
-        // this.eventQueue = new this.game.RAPIER.EventQueue(true)
+        this.eventQueue = new this.game.RAPIER.EventQueue(true)
 
         this.physicals = []
 
@@ -238,22 +238,22 @@ export class Physics
             }
         }
         
-        this.world.step()
-        // this.world.step(this.eventQueue)
+        // this.world.step()
+        this.world.step(this.eventQueue)
 
         // Works but not handy
-        // this.eventQueue.drainCollisionEvents((handle1, handle2, started) =>
-        // {
-        //     if(started)
-        //     {
-        //         const collider1 = this.world.getCollider(handle1)
-        //         const collider2 = this.world.getCollider(handle2)
+        this.eventQueue.drainCollisionEvents((handle1, handle2, started) =>
+        {
+            if(started)
+            {
+                const collider1 = this.world.getCollider(handle1)
+                const collider2 = this.world.getCollider(handle2)
 
-        //         console.log('---')
-        //         console.log(collider1)
-        //         console.log(collider2)
-        //     }
-        // })
+                console.log('---')
+                console.log(collider1)
+                console.log(collider2)
+            }
+        })
 
         // Doesn't work
         // this.eventQueue.drainContactForceEvents(event =>

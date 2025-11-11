@@ -15,6 +15,7 @@ export class Whispers
 
         this.count = parseInt(import.meta.env.VITE_WHISPERS_COUNT)
 
+        this.setSounds()
         this.setFlames()
         this.setData()
         this.setBubble()
@@ -25,6 +26,34 @@ export class Whispers
         {
             this.update()
         }, 3)
+    }
+
+    setSounds()
+    {
+        this.sounds = {}
+        
+        this.sounds.ignite = this.game.audio.register(
+            'ignite',
+            {
+                path: 'sounds/burning/ignite-1.mp3',
+                autoplay: false,
+                loop: false,
+                volume: 0.4,
+                antiSpam: 0.1
+            }
+        )
+        
+        this.sounds.flicker = this.game.audio.register(
+            'flicker',
+            {
+                path: 'sounds/burning/Cloth_Movement_Hung_Clothes_Blowing_in_Wind_ODY-1520-031.mp3',
+                autoplay: true,
+                loop: true,
+                volume: 0.5,
+                positions: new THREE.Vector3(),
+                distanceFade: 10
+            }
+        )
     }
 
     setFlames()
@@ -66,6 +95,7 @@ export class Whispers
 
         // Instanced mesh
         this.flames = new THREE.InstancedMesh(beamGeometry, beamMaterial, this.count)
+        this.flames.renderOrder = 3
         this.flames.frustumCulled = false
         this.flames.visible = true
         this.flames.position.y = 0.25
@@ -275,6 +305,12 @@ export class Whispers
 
                 // Close modal
                 this.game.modals.close()
+
+                // Sound
+                gsap.delayedCall(0.3, () =>
+                {
+                    this.sounds.ignite.play()
+                })
             }
         }
 
@@ -406,7 +442,7 @@ export class Whispers
             {
                 const distance = this.game.player.position.distanceTo(item.position)
 
-                if(distance < closestDistance && distance < this.bubble.minDistance)
+                if(distance < closestDistance)
                 {
                     closestDistance = distance
                     closestWhisper = item
@@ -414,17 +450,12 @@ export class Whispers
             }
         }
 
-        if(closestWhisper !== this.bubble.closest)
+        if(closestDistance < this.bubble.minDistance)
         {
-            if(!closestWhisper)
-            {
-                this.bubble.instance.hide()
-            }
-            else
+            if(closestWhisper !== this.bubble.closest)
             {
                 const position = closestWhisper.position.clone()
                 position.y += 1.25
-
 
                 let imageUrl = null
 
@@ -437,9 +468,13 @@ export class Whispers
                 }
 
                 this.bubble.instance.tryShow(closestWhisper.message, position, imageUrl)
+                this.bubble.closest = closestWhisper
             }
-
-            this.bubble.closest = closestWhisper
+        }
+        else
+        {
+            this.bubble.closest = null
+            this.bubble.instance.hide()
         }
 
         if(this.revealBufferNeedsUpdate)
@@ -447,5 +482,9 @@ export class Whispers
             this.revealBuffer.needsUpdate = true
             this.revealBufferNeedsUpdate = false
         }
+
+        // Sound
+        if(closestWhisper)
+            this.sounds.flicker.positions[0].copy(closestWhisper.position)
     }
 }

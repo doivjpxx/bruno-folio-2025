@@ -64,7 +64,8 @@ export class DayCycles extends Cycles
     getIntervalDescriptions()
     {
         return [
-            { name: 'lights', start: 0.25, end: 0.7 }
+            { name: 'night', start: 0.25, end: 0.7 },
+            { name: 'deepNight', start: 0.35, end: 0.6 },
         ]
     }
 }

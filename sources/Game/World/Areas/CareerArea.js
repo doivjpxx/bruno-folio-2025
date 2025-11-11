@@ -20,6 +20,7 @@ export class CareerArea extends Area
             })
         }
 
+        this.setSounds()
         this.setLines()
         this.setYears()
         this.setAchievement()
@@ -28,6 +29,46 @@ export class CareerArea extends Area
         {
             this.update()
         })
+    }
+
+    setSounds()
+    {
+        this.sounds = {}
+        this.sounds.stoneOut = this.game.audio.register(
+            'stoneOut',
+            {
+                path: 'sounds/stoneSlides/stoneSlideOut.mp3',
+                autoplay: false,
+                loop: false,
+                volume: 0.3,
+                antiSpam: 0.1,
+                positions: new THREE.Vector3(),
+                distanceFade: 14,
+                playBinding: (item, line) =>
+                {
+                    item.positions[0].copy(line.origin)
+                    item.rate = 1.2 + line.index * 0.1
+                }
+            }
+        )
+        this.sounds.stoneIn = this.game.audio.register(
+            'stoneIn',
+            {
+                path: 'sounds/stoneSlides/stoneSlideIn.mp3',
+                autoplay: false,
+                loop: false,
+                volume: 0.2,
+                rate: 0.8,
+                antiSpam: 0.1,
+                positions: new THREE.Vector3(),
+                distanceFade: 14,
+                playBinding: (item, line) =>
+                {
+                    item.positions[0].copy(line.origin)
+                    // item.rate = 0.9 + Math.random() * 0.2
+                }
+            }
+        )
     }
 
     setLines()
@@ -48,28 +89,29 @@ export class CareerArea extends Area
 
         for(const group of lineGroups)
         {
-            const item = {}
-            item.group = group
-            item.size = parseFloat(item.group.userData.size)
-            item.hasEnd = item.group.userData.hasEnd
-            item.color = item.group.userData.color
+            const line = {}
+            line.group = group
+            line.size = parseFloat(line.group.userData.size)
+            line.hasEnd = line.group.userData.hasEnd
+            line.color = line.group.userData.color
             
-            item.stone = item.group.children.find(child => child.name.startsWith('stone'))
-            item.stone.position.y = 0
+            line.stone = line.group.children.find(child => child.name.startsWith('stone'))
+            line.stone.position.y = 0
             
-            item.originZ = item.group.position.z
+            line.origin = line.group.position.clone()
             
-            item.isIn = false
-            item.elevationTarget = 0
-            item.offsetTarget = 0
-            item.labelReveal = uniform(0)
+            line.isIn = false
+            line.isUp = false
+            line.elevationTarget = 0
+            line.offsetTarget = 0
+            line.labelReveal = uniform(0)
 
             {
-                item.textMesh = item.stone.children.find(child => child.name.startsWith('careerText'))
+                line.textMesh = line.stone.children.find(child => child.name.startsWith('careerText'))
 
                 const material = new THREE.MeshLambertNodeMaterial({ transparent: true })
                 
-                const baseTexture = item.textMesh.material.map
+                const baseTexture = line.textMesh.material.map
                 baseTexture.colorSpace = THREE.NoColorSpace
                 baseTexture.magFilter = THREE.LinearFilter
                 baseTexture.minFilter = THREE.LinearFilter
@@ -77,13 +119,13 @@ export class CareerArea extends Area
                 baseTexture.wrapT = THREE.ClampToEdgeWrapping
                 baseTexture.generateMipmaps = false
 
-                const baseColor = colors[item.color]
+                const baseColor = colors[line.color]
 
                 material.outputNode = Fn(() =>
                 {
                     const baseUv = uv().toVar()
 
-                    step(baseUv.x, item.labelReveal).lessThan(0.5).discard()
+                    step(baseUv.x, line.labelReveal).lessThan(0.5).discard()
 
                     const textureColor = texture(baseTexture, baseUv)
 
@@ -98,12 +140,20 @@ export class CareerArea extends Area
                 })()
 
                 // Mesh
-                item.textMesh.castShadow = false
-                item.textMesh.receiveShadow = false
-                item.textMesh.material = material
+                line.textMesh.castShadow = false
+                line.textMesh.receiveShadow = false
+                line.textMesh.material = material
             }
 
-            this.lines.items.push(item)
+            this.lines.items.push(line)
+        }
+
+        this.lines.items.sort((a, b) => b.origin.z - a.origin.z)
+
+        let i = 0
+        for(const line of this.lines.items)
+        {
+            line.index = i++
         }
 
         // Debug
@@ -238,7 +288,7 @@ export class CareerArea extends Area
         // Lines
         for(const line of this.lines.items)
         {
-            const delta = line.originZ - this.game.player.position.z
+            const delta = line.origin.z - this.game.player.position.z
 
             // Is in
             if(delta > - this.lines.padding && delta < line.size + this.lines.padding * 2)
@@ -263,19 +313,42 @@ export class CareerArea extends Area
             // Elevation
             if(line.isIn)
             {
-                line.elevationTarget = this.lines.activeElevation
+                if(!line.isUp)
+                {
+                    line.isUp = true
+                    this.sounds.stoneOut.play(line)
+                }
             }
             else
             {
                 if(delta > line.size)
                 {
                     if(line.hasEnd)
-                        line.elevationTarget = 0
+                    {
+                        if(line.isUp)
+                        {
+                            line.isUp = false
+                            gsap.delayedCall(0.3, () =>
+                            {
+                                this.sounds.stoneIn.play(line)
+                            })
+                        }
+                    }
                 }
                 else
-                    line.elevationTarget = 0
+                {
+                    if(line.isUp)
+                    {
+                        line.isUp = false
+                        gsap.delayedCall(0.3, () =>
+                        {
+                            this.sounds.stoneIn.play(line)
+                        })
+                    }
+                }
             }
 
+            line.elevationTarget = line.isUp ? this.lines.activeElevation : 0
             line.stone.position.y += (line.elevationTarget - line.stone.position.y) * this.game.ticker.deltaScaled * 3
 
             // Position

@@ -66,6 +66,25 @@ export class AltarArea extends Area
                 distanceFade: 20
             }
         )
+
+        this.sounds.deathBell1 = this.game.audio.register(
+            'deathBell',
+            {
+                path: 'sounds/bell/Death Hit.mp3',
+                autoplay: false,
+                loop: false,
+                volume: 0.4
+            }
+        )
+        this.sounds.deathBell2 = this.game.audio.register(
+            'deathBell',
+            {
+                path: 'sounds/bell/Epic Bell Impact Hit.mp3',
+                autoplay: false,
+                loop: false,
+                volume: 0.4
+            }
+        )
     }
 
     setBeam()
@@ -296,6 +315,11 @@ export class AltarArea extends Area
                 this.data.insert()
                 this.updateValue(this.value + 1)
                 this.game.player.die()
+                this.sounds.deathBell2.play()
+                gsap.delayedCall(2.2, () =>
+                {
+                    this.sounds.deathBell1.play()
+                })
                 this.game.achievements.setProgress('sacrifice', 1)
             }
         )

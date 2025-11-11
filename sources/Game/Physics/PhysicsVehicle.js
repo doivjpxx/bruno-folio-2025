@@ -14,7 +14,8 @@ export class PhysicsVehicle
         this.steeringAmplitude = 0.5
         this.engineForceAmplitude = 300
         this.boostMultiplier = 2
-        this.maxSpeed = 20
+        this.topSpeed = 5
+        this.topSpeedBoost = 40
         this.brakeAmplitude = 35
         this.idleBrake = 0.06
         this.reverseBrake = 0.4
@@ -50,7 +51,8 @@ export class PhysicsVehicle
             this.debugPanel.addBinding(this, 'steeringAmplitude', { min: 0, max: Math.PI * 0.5, step: 0.01 })
             this.debugPanel.addBinding(this, 'engineForceAmplitude', { min: 1, max: 20, step: 1 })
             this.debugPanel.addBinding(this, 'boostMultiplier', { min: 1, max: 5, step: 0.01 })
-            this.debugPanel.addBinding(this, 'maxSpeed', { min: 0, max: 20, step: 0.1 })
+            this.debugPanel.addBinding(this, 'topSpeed', { min: 0, max: 20, step: 0.1 })
+            this.debugPanel.addBinding(this, 'topSpeedBoost', { min: 0, max: 20, step: 0.1 })
             this.debugPanel.addBinding(this, 'brakeAmplitude', { min: 0, max: 200, step: 0.01 })
             this.debugPanel.addBinding(this, 'idleBrake', { min: 0, max: 1, step: 0.001 })
             this.debugPanel.addBinding(this, 'reverseBrake', { min: 0, max: 1, step: 0.001 })
@@ -447,8 +449,8 @@ export class PhysicsVehicle
     updatePrePhysics()
     {
         // Engine force
-        const maxSpeed = this.maxSpeed + (this.maxSpeed * (this.boostMultiplier - 1) * this.game.player.boosting)
-        const overflowSpeed = Math.max(0, this.speed - maxSpeed)
+        const topSpeed = lerp(this.topSpeed, this.topSpeedBoost, this.game.player.boosting)
+        const overflowSpeed = Math.max(0, this.speed - topSpeed)
         let engineForce = (this.game.player.accelerating * (1 + this.game.player.boosting * this.boostMultiplier)) * this.engineForceAmplitude / (1 + overflowSpeed) * this.game.ticker.deltaScaled
 
         // Brake

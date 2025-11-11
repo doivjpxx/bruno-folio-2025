@@ -1,6 +1,8 @@
+import * as THREE from 'three/webgpu'
 import { Howl, Howler } from 'howler'
 import { Game } from './Game.js'
 import { remap, remapClamp, clamp } from './utilities/maths.js'
+import gsap from 'gsap'
 
 export class Audio
 {
@@ -27,7 +29,7 @@ export class Audio
         this.setAmbiants()
         this.setPunctuals()
         
-        this.music.play()
+        // this.music.play()
 
         // Play all autoplays that didn't start because not initated
         this.groups.forEach((group, name) =>
@@ -132,6 +134,203 @@ export class Audio
 
     setAmbiants()
     {
+        const getRandomDirection = (distance = 30) =>
+        {
+            return new THREE.Vector3(
+                this.game.view.focusPoint.position.x + ((Math.random() < 0.5) ? distance : - distance),
+                this.game.view.focusPoint.position.y,
+                this.game.view.focusPoint.position.z + ((Math.random() < 0.5) ? distance : - distance)
+            )
+        }
+        
+        // Birds tweets
+        {
+            const tweetsPaths = [
+                'sounds/birdTweets/24074 small bird tweet calling-full-1.mp3',
+                'sounds/birdTweets/24074 small bird tweet calling-full-2.mp3',
+                'sounds/birdTweets/24074 small bird tweet calling-full-3.mp3',
+                'sounds/birdTweets/20711 finch bird isolated tweet-full.mp3',
+                'sounds/birdTweets/30673 Yellowhammer bird tweet 3-full.mp3',
+                'sounds/birdTweets/31062 Ortolan bird tweet-full.mp3',
+                'sounds/birdTweets/31451 Ortolan bunting bird isolated tweet-full.mp3',
+            ]
+
+            const tweets = []
+            for(const path of tweetsPaths)
+                tweets.push(
+                    this.register(
+                        'birdTweet',
+                        {
+                            path: path,
+                            autoplay: false,
+                            loop: false,
+                            volume: 0.3,
+                            positions: new THREE.Vector3(),
+                            playBinding: (item) =>
+                            {
+                                item.volume = 0.2 + Math.random() * 0.15
+                                item.rate = 1 + Math.random() * 0.7
+                                item.positions[0].copy(getRandomDirection())
+                            }
+                        }
+                    )
+                )
+
+
+            const tryPlay = () =>
+            {
+                // Chance to trigger
+                if(!this.game.dayCycles.intervalEvents.get('night').inInterval && Math.random() < 0.5)
+                {
+                    const sound = tweets[Math.floor(Math.random() * tweets.length)]
+                    sound.play()
+                }
+
+                // Wait before trying again
+                gsap.delayedCall(0.5 + Math.random() * 5, tryPlay)
+            }
+            tryPlay()
+        }
+        
+        // Owl
+        {
+            const sound = this.register(
+                'owl',
+                {
+                    path: 'sounds/owl/OwlHootingReverberantSeveral_Rik8a_03.mp3',
+                    autoplay: false,
+                    loop: false,
+                    volume: 0.3,
+                    positions: new THREE.Vector3(),
+                    playBinding: (item) =>
+                    {
+                        item.volume = 0.2 + Math.random() * 0.15
+                        item.rate = 1 + Math.random() * 0.3
+                        item.positions[0].copy(getRandomDirection())
+                    }
+                }
+            )
+
+            const tryPlay = () =>
+            {
+                // Chance to trigger
+                if(this.game.dayCycles.intervalEvents.get('night').inInterval && Math.random() < 0.5)
+                {
+                    sound.play()
+                }
+
+                // Wait before trying again
+                gsap.delayedCall(30 + Math.random() * 60, tryPlay)
+            }
+            gsap.delayedCall(30 + Math.random() * 60, tryPlay)
+        }
+
+        // Rooster
+        {
+            const sound = this.register(
+                'rooster',
+                {
+                    path: 'sounds/rooster/rooster-crowing.mp3',
+                    autoplay: false,
+                    loop: false,
+                    volume: 0.1,
+                    positions: new THREE.Vector3(),
+                    playBinding: (item) =>
+                    {   
+                        item.volume = 0.05 + Math.random() * 0.15
+                        item.positions[0].copy(getRandomDirection())
+                    }
+                }
+            )
+
+            this.game.dayCycles.events.on('night', (inInterval) =>
+            {
+                if(!inInterval)
+                    sound.play()
+            })
+        }
+
+        // Wolf
+        {
+            const sound = this.register(
+                'wolf',
+                {
+                    path: 'sounds/wolf/TimberWolvesGroupHowlingSomeWhimpering_S2h0E_04.mp3',
+                    autoplay: false,
+                    loop: false,
+                    volume: 0.1,
+                    positions: new THREE.Vector3(),
+                    playBinding: (item) =>
+                    {   
+                        item.volume = 0.05 + Math.random() * 0.15
+                        item.positions[0].copy(getRandomDirection())
+                    }
+                }
+            )
+
+            this.game.dayCycles.events.on('deepNight', (inInterval) =>
+            {
+                if(inInterval)
+                    sound.play()
+            })
+        }
+
+        // Crickets
+        {
+
+            const sound = this.register(
+                'crickets',
+                {
+                    path: 'sounds/crickets/Crickets.mp3',
+                    autoplay: true,
+                    loop: true,
+                    volume: this.game.dayCycles.intervalEvents.get('night').inInterval ? 0.4 : 0
+                }
+            )
+
+
+            this.game.dayCycles.events.on('night', (inInterval) =>
+            {
+                gsap.to(sound, { volume: inInterval ? 1 : 0, duration: 15, overwrite: true })
+            })
+        }
+
+        // Jingle bells
+        this.register(
+            'jingleBells',
+            {
+                path: 'sounds/jingleBells/Mountain Audio - Christmas Bells.mp3',
+                autoplay: true,
+                loop: true,
+                volume: 0,
+                tickBinding: (item) =>
+                {
+                    const sine = Math.sin(this.game.ticker.elapsedScaled * 0.1) * 0.5 + 0.5
+                    const targetVolume = Math.max(0, this.game.weather.snow.value) * 0.3 * sine
+
+                    const easing = targetVolume > item.volume ? 0.005 : 0.05
+                    item.volume += (targetVolume - item.volume) * this.game.ticker.deltaScaled * easing
+                }
+            }
+        )
+
+        // Rain
+        this.register(
+            'rain',
+            {
+                path: 'sounds/rain/soundjay_rain-on-leaves_main-01.mp3',
+                autoplay: true,
+                loop: true,
+                volume: 0,
+                tickBinding: (item) =>
+                {
+                    const snowAttenuation = remapClamp(this.game.weather.snow.value, 0, 0.6, 1, 0)
+                    item.volume = Math.pow(this.game.weather.rain.value * snowAttenuation, 2)
+                }
+            }
+        )
+
+        // Wind
         this.register(
             'wind',
             {
@@ -146,20 +345,7 @@ export class Audio
             }
         )
 
-        this.register(
-            'rain',
-            {
-                path: 'sounds/rain/soundjay_rain-on-leaves_main-01.mp3',
-                autoplay: true,
-                loop: true,
-                volume: 0,
-                tickBinding: (item) =>
-                {
-                    item.volume = Math.pow(this.game.weather.rain.value, 2)
-                }
-            }
-        )
-
+        // Waves
         this.register(
             'waves',
             {
@@ -178,6 +364,7 @@ export class Audio
             }
         )
 
+        // Floor
         this.register(
             'floor',
             {
@@ -197,6 +384,7 @@ export class Audio
             }
         )
 
+        // Floor
         this.register(
             'floor',
             {
@@ -224,6 +412,7 @@ export class Audio
             }
         )
 
+        // Floor
         this.register(
             'floor',
             {
@@ -240,6 +429,7 @@ export class Audio
             }
         )
 
+        // Engine
         this.register(
             'engine',
             {
@@ -263,6 +453,7 @@ export class Audio
             }
         )
 
+        // Spin
         this.register(
             'spin',
             {
@@ -290,6 +481,7 @@ export class Audio
             }
         )
 
+        // Energy
         this.register(
             'energy',
             {
@@ -313,6 +505,7 @@ export class Audio
             }
         )
 
+        // Energy
         this.register(
             'energy',
             {
@@ -333,7 +526,7 @@ export class Audio
             }
         )
 
-        // Project Area + Cookie Area
+        // Oven fire (Project Area + Cookie Area)
         {
             const positions = []
             if(this.game.world.areas.cookieStand)
@@ -357,7 +550,7 @@ export class Audio
             }
         }
 
-        // Lab Area + Bonfire Area
+        // Campfire (Lab Area + Bonfire Area)
         {
             const positions = []
             if(this.game.world.areas.lab)
