@@ -483,7 +483,7 @@ export class BowlingArea extends Area
         const sound = this.game.audio.register(
             'jukebox',
             {
-                path: 'sounds/jukebox/DVDPlayerChangeDisc_BW.49824.wav',
+                path: 'sounds/jukebox/DVDPlayerChangeDisc_BW.49824.mp3',
                 autoplay: false,
                 loop: false,
                 volume: 0.3,
@@ -505,7 +505,7 @@ export class BowlingArea extends Area
                 switching = true
 
                 sound.play()
-                
+
                 this.game.audio.playlist.current.sound.stop()
 
                 gsap.delayedCall(3, () =>
