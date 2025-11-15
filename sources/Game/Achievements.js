@@ -459,7 +459,6 @@ export class Achievements
                             this.game.modals.open('achievements')
                         }
                     )
-
                 }
             }
         }
@@ -571,5 +570,18 @@ export class Achievements
         this.storage.save()
         this.globalProgress.update()
         this.rewards.update()
+
+        const landingLeaveAchievement = this.groups.get('landingLeave')
+        if(landingLeaveAchievement && this.game.world.areas.landing)
+        {
+            if(!this.game.world.areas.landing.isIn)
+                landingLeaveAchievement.setProgress(1)
+        }
+
+        const debugAchievement = this.groups.get('debug')
+        if(debugAchievement && this.game.debug.active)
+        {
+            debugAchievement.setProgress(1)
+        }
     }
 }

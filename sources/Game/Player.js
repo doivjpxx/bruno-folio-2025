@@ -27,10 +27,10 @@ export class Player
         this.basePosition = this.position.clone()
         this.position2 = new THREE.Vector2(this.position.x, this.position.z)
         this.rotationY = 0
-        this.distanceDriven = 0
-        
+
         this.setSounds()
         this.setInputs()
+        this.setDistanceDriven()
         this.setUnstuck()
         this.setBackWheel()
         this.setFlip()
@@ -326,6 +326,20 @@ export class Player
         })
     }
 
+    setDistanceDriven()
+    {
+        this.distanceDriven = {}
+
+        const localDistanceDriven = localStorage.getItem('distanceDriven')
+        this.distanceDriven.value = localDistanceDriven ? parseInt(localDistanceDriven) : 0
+        this.distanceDriven.floored = Math.floor(this.distanceDriven.value)
+        this.distanceDriven.reset = () =>
+        {
+
+        }
+        
+    }
+
     setUnstuck()
     {
         this.unstuck = {}
@@ -617,8 +631,17 @@ export class Player
         if(this.game.achievements.groups.get('speed') && speedKmPerHour > this.game.achievements.groups.get('speed').progress)
             this.game.achievements.setProgress('speed', speedKmPerHour)
 
-        // Drive achievement
-        this.distanceDriven += this.game.physicalVehicle.xzSpeed * this.game.ticker.deltaScaled
+        // Distance driven
+        this.distanceDriven.value += this.game.physicalVehicle.xzSpeed * this.game.ticker.deltaScaled
+        const flooredDistanceDriven = Math.floor(this.distanceDriven.value)
+
+        if(flooredDistanceDriven !== this.distanceDriven.floored)
+        {
+            localStorage.setItem('distanceDriven', flooredDistanceDriven)
+            this.distanceDriven.floored = flooredDistanceDriven
+        }
+        
+        // Achievement
         const distanceDrivenKm = Math.floor(this.distanceDriven / 1000)
 
         if(this.game.achievements.groups.get('distanceDriven') && distanceDrivenKm > this.game.achievements.groups.get('distanceDriven').progress)

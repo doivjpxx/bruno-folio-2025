@@ -9,6 +9,7 @@ export class Area
         
         this.references = references
 
+        this.isIn = false
         this.events = new Events()
         
         this.setZone()
@@ -31,6 +32,7 @@ export class Area
             'enter',
             () =>
             {
+                this.isIn = true
                 this.events.trigger('enter')
             }
         )
@@ -39,6 +41,7 @@ export class Area
             'leave',
             () =>
             {
+                this.isIn = false
                 this.events.trigger('leave')
             }
         )
