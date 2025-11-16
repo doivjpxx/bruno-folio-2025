@@ -77,7 +77,7 @@ export class BonfireArea extends Area
             return scaleAttribute.mul(progressScale)
         })()
 
-        const geometry = new THREE.PlaneGeometry(1, 1)
+        const geometry = new THREE.CircleGeometry(0.5, 8)
 
         this.particles = new THREE.Mesh(geometry, material)
         this.particles.visible = false
