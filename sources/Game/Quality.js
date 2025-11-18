@@ -11,7 +11,6 @@ export class Quality
 
         const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
         this.level = isMobile ? 1 : 0 // 0 = highest quality
-        console.log(this.level)
 
         // Debug
         if(this.game.debug.active)
@@ -45,7 +44,6 @@ export class Quality
             return
 
         this.level = level
-        console.log(this.level)
         this.events.trigger('change', [ this.level ])
     }
 }

@@ -305,7 +305,7 @@ export class View
         this.spherical.radius = {}
         this.spherical.radius.edges = { min: 15, max: 30 }
         this.spherical.radius.current = lerp(this.spherical.radius.edges.min, this.spherical.radius.edges.max, 1 - this.zoom.smoothedRatio)
-        this.spherical.radius.nonIdealRatioOffset = 7
+        this.spherical.radius.nonIdealRatioOffset = 12
 
         this.spherical.offset = new THREE.Vector3()
         this.spherical.offset.setFromSphericalCoords(this.spherical.radius.current, this.spherical.phi, this.spherical.theta)

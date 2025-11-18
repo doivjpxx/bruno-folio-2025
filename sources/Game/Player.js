@@ -562,7 +562,7 @@ export class Player
         {
             this.game.view.focusPoint.isTracking = true
             this.accelerating = Math.pow(this.game.inputs.nipple.progress, 3)
-            this.boosting = this.game.inputs.nipple.progress > 0.999
+            // this.boosting = this.game.inputs.nipple.progress > 0.999
 
             const angleDeltaAbs = Math.abs(this.game.inputs.nipple.smallestAngle)
             const angleDeltaAbsNormalized = angleDeltaAbs / ((Math.PI * 2 - this.game.inputs.nipple.forwardAmplitude) / 2)

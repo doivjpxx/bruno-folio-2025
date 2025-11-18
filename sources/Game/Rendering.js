@@ -44,7 +44,7 @@ export class Rendering
         this.renderer = new THREE.WebGPURenderer({ canvas: this.game.canvasElement, forceWebGL: false, antialias: true })
         this.renderer.setSize(this.game.viewport.width, this.game.viewport.height)
         this.renderer.setPixelRatio(this.game.viewport.pixelRatio)
-        this.renderer.sortObjects = false
+        this.renderer.sortObjects = true
         this.renderer.domElement.classList.add('experience')
         this.renderer.shadowMap.enabled = true
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap

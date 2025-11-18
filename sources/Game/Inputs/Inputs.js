@@ -152,14 +152,14 @@ export class Inputs
     {
         this.nipple = new Nipple()
         this.addActions([
-            { name: 'rayPointer', categories: [ 'wandering', 'racing' ], keys: [ 'Pointer.any' ] },
+            { name: 'nipplePointer', categories: [ 'wandering', 'racing' ], keys: [ 'Pointer.any' ] },
         ])
 
-        this.events.on('rayPointer', (action) =>
+        this.events.on('nipplePointer', (action) =>
         {
             if(this.mode !== Inputs.MODE_TOUCH)
                 return
-
+                
             this.nipple.updateFromPointer(this.pointer, action)
         })
     }

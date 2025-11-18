@@ -6,7 +6,6 @@ export class RayCursor
     constructor()
     {
         this.game = Game.getInstance()
-        // console.log(this.game.ticker.wait)
 
         this.currentIntersect = null
         this.intersects = []
@@ -50,28 +49,21 @@ export class RayCursor
     testIntersects(actionTrigger)
     {
         // Start
-        if(actionTrigger === 'start')
+        if(actionTrigger === 'start' || actionTrigger === 'change')
         {
-            this.deltaCursor.x = 0
-            this.deltaCursor.y = 0
-
-            if(this.currentIntersect)
+            if(actionTrigger === 'start')
             {
-                this.currentIntersect.isDown = true
-
-                if(typeof this.currentIntersect.onDown === 'function')
-                    this.currentIntersect.onDown()
+                this.deltaCursor.y = 0
+                this.deltaCursor.x = 0
             }
-        }
+            else if(actionTrigger === 'change')
+            {
+                this.deltaCursor.x += Math.abs(this.game.inputs.pointer.delta.x)
+                this.deltaCursor.y += Math.abs(this.game.inputs.pointer.delta.y)
+            }
 
-        // Change
-        else if(actionTrigger === 'change')
-        {
             const intersects = this.intersects.filter(intersect => intersect.active)
             let isAnyIntersecting = false
-
-            this.deltaCursor.x += Math.abs(this.game.inputs.pointer.delta.x)
-            this.deltaCursor.y += Math.abs(this.game.inputs.pointer.delta.y)
 
             if(intersects.length)
             {
@@ -144,6 +136,17 @@ export class RayCursor
 
                 if(!isAnyIntersecting)
                     this.currentIntersect = null
+            }
+
+            if(actionTrigger === 'start')
+            {
+                if(this.currentIntersect)
+                {
+                    this.currentIntersect.isDown = true
+
+                    if(typeof this.currentIntersect.onDown === 'function')
+                        this.currentIntersect.onDown()
+                }
             }
         }
 
