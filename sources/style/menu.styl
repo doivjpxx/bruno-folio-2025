@@ -30,6 +30,10 @@
             width @css{ min(600px, calc(100vw - 70px)) }
             height @css{ max(80vh, calc(100vh - 70px)) }
 
+        @media only screen and (max-width 420px)
+            left 0
+            width calc(100vw - 10px)
+
     .container
         position relative
         display flex
@@ -145,6 +149,10 @@
         @media only screen and (orientation portrait)
             left 10px
 
+        @media only screen and (max-width 420px)
+            left 0
+            gap 2px
+
         .item
             position relative
             width 50px
@@ -212,6 +220,12 @@
         top 10px
         width 44px
         height 44px
+
+        @media only screen and (max-width 420px)
+            left auto
+            right -2px
+            z-index 1
+            transform rotate(180deg)
 
         --hover-translate 4px
 
