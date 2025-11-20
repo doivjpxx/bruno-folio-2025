@@ -78,7 +78,7 @@
                 <div class="js-navigation navigation">
 
                     <!-- Intro -->
-                    <button class="js-navigation-item item" data-name="intro">
+                    <button class="js-navigation-item item" data-name="home">
                         <div class="button-inner">
                             <div class="icon-container">
                                 <img src="ui/home.svg">
@@ -137,8 +137,8 @@
                     <div class="previews js-previews">
 
                         <!-- Intro -->
-                        <div class="js-preview preview intro-preview">
-                            <img class="background" src="ui/previews/intro.png" loading="lazy">
+                        <div class="js-preview preview home-preview">
+                            <img class="background" src="ui/previews/home.png" loading="lazy">
                         </div>
 
                         <!-- Controls -->
@@ -171,21 +171,47 @@
 
                     <div class="contents js-contents">
                         <!-- Intro -->
-                        <div class="js-content content intro-content">
+                        <div class="js-content content home-content">
                             <div class="content-inner">
                                 <div class="title">Bruno's Home</div>
                                 <p class="text">Welcome!</p>
                                 <p class="text">My name is Bruno and I'm a creative developer.</p>
-                                <p class="text">Please drive around to learn more about me and discover the many secrets of this world.</p>
-                                <p class="text start">
-                                    <button class="js-unstuck button">
-                                        Unstuck
-                                    </button>
-                                    <button class="js-audio-toggle audio-toggle button is-active">
-                                        <img class="audio-on" src="ui/audio/audioOn.svg">
-                                        <img class="audio-off" src="ui/audio/audioOff.svg">
-                                    </button>
-                                </p>
+                                <p class="text">Drive around to learn more about me and discover the many secrets of this world.</p>
+                                <table class="options">
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                Audio 
+                                            </td>
+                                            <td>
+                                                <button class="js-audio-toggle audio-toggle button is-active">
+                                                    <img class="audio-on" src="ui/audio/audioOn.svg">
+                                                    <img class="audio-off" src="ui/audio/audioOff.svg">
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                Quality 
+                                            </td>
+                                            <td>
+                                                <button class="js-quality-toggle quality-toggle button">
+                                                    Low
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                I'm stuck!
+                                            </td>
+                                            <td>
+                                                <button class="js-respawn button">
+                                                    Respawn
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 

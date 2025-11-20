@@ -66,7 +66,7 @@ export class ClosingManager
                 }
                 else
                 {
-                    this.game.menu.open('intro')
+                    this.game.menu.open('home')
                 }
             }
         })

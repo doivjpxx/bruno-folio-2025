@@ -39,7 +39,7 @@ export class LandingArea extends Area
             () =>
             {
                 this.game.inputs.interactiveButtons.clearItems()
-                this.game.menu.open('intro')
+                this.game.menu.open('home')
                 this.interactivePoint.hide()
             },
             () =>
@@ -56,7 +56,7 @@ export class LandingArea extends Area
             }
         )
 
-        this.game.menu.items.get('intro').events.on('close', () =>
+        this.game.menu.items.get('home').events.on('close', () =>
         {
             this.interactivePoint.show()
         })

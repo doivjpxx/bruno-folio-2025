@@ -35,6 +35,7 @@ export class Player
         this.setBackWheel()
         this.setFlip()
         this.setTimePlayed()
+        this.setRespawn()
 
         this.game.physicalVehicle.chassis.physical.initialState.position.x = respawn.position.x
         this.game.physicalVehicle.chassis.physical.initialState.position.y = respawn.position.y
@@ -453,6 +454,17 @@ export class Player
         {
             localStorage.setItem('timePlayed', this.timePlayed)
         }, 1000)
+    }
+
+    setRespawn()
+    {
+        this.respawnButtonElement = this.game.menu.items.get('home').contentElement.querySelector('.js-respawn')
+
+        this.respawnButtonElement.addEventListener('click', () =>
+        {
+            this.respawn()
+            this.game.menu.close()
+        })
     }
 
     respawn(respawnName = null, callback = null)
