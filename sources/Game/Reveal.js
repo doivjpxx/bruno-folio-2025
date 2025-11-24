@@ -122,12 +122,9 @@ export class Reveal
                     const position = this.position.clone()
                     position.y = 0
                     
-                    const intersect = this.game.rayCursor.addIntersects({
+                    const intersect = this.game.rayCursor.addIntersect({
                         active: true,
-                        shapes:
-                        [
-                            new THREE.Sphere(position, 3.5)
-                        ],
+                        shape: new THREE.Sphere(position, 3.5),
                         onClick: next,
                         onEnter: () =>
                         {

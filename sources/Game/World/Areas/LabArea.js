@@ -550,12 +550,9 @@ export class LabArea extends Area
         const intersectPreviousPosition = new THREE.Vector3()
         intersectPrevious.getWorldPosition(intersectPreviousPosition)
 
-        this.adjacents.previousIntersect = this.game.rayCursor.addIntersects({
+        this.adjacents.previousIntersect = this.game.rayCursor.addIntersect({
             active: false,
-            shapes:
-            [
-                new THREE.Sphere(intersectPreviousPosition, intersectPrevious.scale.x)
-            ],
+            shape: new THREE.Sphere(intersectPreviousPosition, intersectPrevious.scale.x),
             onClick: () =>
             {
                 this.previous(true)
@@ -583,12 +580,9 @@ export class LabArea extends Area
         const intersectNextPosition = new THREE.Vector3()
         intersectNext.getWorldPosition(intersectNextPosition)
 
-        this.adjacents.nextIntersect = this.game.rayCursor.addIntersects({
+        this.adjacents.nextIntersect = this.game.rayCursor.addIntersect({
             active: false,
-            shapes:
-            [
-                new THREE.Sphere(intersectNextPosition, intersectNext.scale.x)
-            ],
+            shape: new THREE.Sphere(intersectNextPosition, intersectNext.scale.x),
             onClick: () =>
             {
                 this.next()
@@ -699,12 +693,9 @@ export class LabArea extends Area
         const intersect = this.references.items.get('intersectUrl')[0]
         intersect.visible = false
  
-        this.url.intersect = this.game.rayCursor.addIntersects({
+        this.url.intersect = this.game.rayCursor.addIntersect({
             active: false,
-            shapes:
-            [
-                intersect
-            ],
+            shape: intersect,
             onClick: () =>
             {
                 this.url.open()
@@ -954,12 +945,9 @@ export class LabArea extends Area
 
                 // Intersect
                 intersectMesh.visible = false      
-                mini.intersect = this.game.rayCursor.addIntersects({
+                mini.intersect = this.game.rayCursor.addIntersect({
                     active: false,
-                    shapes:
-                    [
-                        intersectMesh
-                    ],
+                    shape: intersectMesh,
                     onClick: () =>
                     {
                         this.changeProject(mini.index)

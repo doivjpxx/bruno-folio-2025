@@ -348,12 +348,9 @@ export class InteractivePoints
         /**
          * Cursor
          */
-        item.intersect = this.game.rayCursor.addIntersects({
+        item.intersect = this.game.rayCursor.addIntersect({
             active: false,
-            shapes:
-            [
-                new THREE.Sphere(newPosition, 1)
-            ],
+            shape: new THREE.Sphere(newPosition, 1),
             onClick: () =>
             {
                 if(item.state !== InteractivePoints.STATE_HIDDEN)

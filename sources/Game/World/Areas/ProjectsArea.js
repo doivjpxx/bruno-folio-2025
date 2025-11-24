@@ -583,12 +583,9 @@ export class ProjectsArea extends Area
                 // Intersect
                 item.intersectReference = intersectPagination[i]
 
-                item.intersect = this.game.rayCursor.addIntersects({
+                item.intersect = this.game.rayCursor.addIntersect({
                     active: false,
-                    shapes:
-                    [
-                        new THREE.Sphere(new THREE.Vector3(), item.intersectReference.scale.x)
-                    ],
+                    shape: new THREE.Sphere(new THREE.Vector3(), item.intersectReference.scale.x),
                     onClick: () =>
                     {
                         this.changeImage(item.index)
@@ -602,7 +599,7 @@ export class ProjectsArea extends Area
                         item.mesh.material = this.hover.inactiveMaterial
                     }
                 }),
-                item.intersectReference.getWorldPosition(item.intersect.shapes[0].center)
+                item.intersectReference.getWorldPosition(item.intersect.shape.center)
 
                 this.pagination.items.push(item)
 
@@ -618,12 +615,9 @@ export class ProjectsArea extends Area
         const arrowPrevious = this.references.items.get('arrowPreviousImage')[0]
         arrowPrevious.material = this.hover.inactiveMaterial
  
-        this.pagination.previousIntersect = this.game.rayCursor.addIntersects({
+        this.pagination.previousIntersect = this.game.rayCursor.addIntersect({
             active: false,
-            shapes:
-            [
-                new THREE.Sphere(intersectPreviousPosition, intersectPrevious.scale.x)
-            ],
+            shape: new THREE.Sphere(intersectPreviousPosition, intersectPrevious.scale.x),
             onClick: () =>
             {
                 this.previous()
@@ -643,12 +637,9 @@ export class ProjectsArea extends Area
         intersectNext.getWorldPosition(intersectNextPosition)
         const arrowNext = this.references.items.get('arrowNextImage')[0]
         arrowNext.material = this.hover.inactiveMaterial
-        this.pagination.nextIntersect = this.game.rayCursor.addIntersects({
+        this.pagination.nextIntersect = this.game.rayCursor.addIntersect({
             active: false,
-            shapes:
-            [
-                new THREE.Sphere(intersectNextPosition, intersectNext.scale.x)
-            ],
+            shape: new THREE.Sphere(intersectNextPosition, intersectNext.scale.x),
             onClick: () =>
             {
                 this.next()
@@ -701,7 +692,7 @@ export class ProjectsArea extends Area
             gsap.to(this.pagination.group.position, { x: offset, duration: 0.5, ease: 'power1.inOut', overwrite: true, onComplete: () =>
             {
                 for(const item of this.pagination.items)
-                    item.intersectReference.getWorldPosition(item.intersect.shapes[0].center)
+                    item.intersectReference.getWorldPosition(item.intersect.shape.center)
             } })
         }
     }
@@ -818,12 +809,9 @@ export class ProjectsArea extends Area
         const intersectPreviousPosition = new THREE.Vector3()
         intersectPrevious.getWorldPosition(intersectPreviousPosition)
 
-        this.adjacents.previous.intersect = this.game.rayCursor.addIntersects({
+        this.adjacents.previous.intersect = this.game.rayCursor.addIntersect({
             active: false,
-            shapes:
-            [
-                new THREE.Sphere(intersectPreviousPosition, intersectPrevious.scale.x)
-            ],
+            shape: new THREE.Sphere(intersectPreviousPosition, intersectPrevious.scale.x),
             onClick: () =>
             {
                 this.previousProject(true)
@@ -869,12 +857,9 @@ export class ProjectsArea extends Area
         const intersectNextPosition = new THREE.Vector3()
         intersectNext.getWorldPosition(intersectNextPosition)
 
-        this.adjacents.next.intersect = this.game.rayCursor.addIntersects({
+        this.adjacents.next.intersect = this.game.rayCursor.addIntersect({
             active: false,
-            shapes:
-            [
-                new THREE.Sphere(intersectNextPosition, intersectNext.scale.x)
-            ],
+            shape: new THREE.Sphere(intersectNextPosition, intersectNext.scale.x),
             onClick: () =>
             {
                 this.nextProject()
@@ -1010,12 +995,9 @@ export class ProjectsArea extends Area
         const intersect = this.references.items.get('intersectUrl')[0]
         intersect.visible = false
  
-        this.url.intersect = this.game.rayCursor.addIntersects({
+        this.url.intersect = this.game.rayCursor.addIntersect({
             active: false,
-            shapes:
-            [
-                intersect
-            ],
+            shape: intersect,
             onClick: () =>
             {
                 this.url.open()

@@ -207,12 +207,9 @@ export class Intro
         position.x += 0.38
         position.y += - 1
 
-        this.soundButton.intersect = this.game.rayCursor.addIntersects({
+        this.soundButton.intersect = this.game.rayCursor.addIntersect({
             active: true,
-            shapes:
-            [
-                new THREE.Sphere(position, 0.5)
-            ],
+            shape: new THREE.Sphere(position, 0.5),
             onClick: () =>
             {
                 this.game.audio.muteToggle.toggle()

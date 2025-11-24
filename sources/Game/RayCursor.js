@@ -17,12 +17,13 @@ export class RayCursor
         this.setPointerTesting()
     }
 
-    addIntersects(description)
+    addIntersect(description)
     {
         const intersect = { ...description }
         intersect.isIntersecting = false
         intersect.isDown = false
-        
+        intersect.position = intersect.shape instanceof THREE.Mesh ? intersect.shape.position : intersect.shape.center
+
         this.intersects.push(intersect)
         this.needsTest = intersect.active
 
@@ -62,7 +63,23 @@ export class RayCursor
                 this.deltaCursor.y += Math.abs(this.game.inputs.pointer.delta.y)
             }
 
-            const intersects = this.intersects.filter(intersect => intersect.active)
+            const intersects = this.intersects.filter((intersect) =>
+            {
+                // Test active
+                if(!intersect.active)
+                    return false
+
+                // Test too far
+                const distance = Math.hypot(
+                    this.game.view.focusPoint.position.x - intersect.position.x,
+                    this.game.view.focusPoint.position.z - intersect.position.z
+                )
+
+                if(distance > this.game.view.optimalArea.radius)
+                    return false
+
+                return true
+            })
             let isAnyIntersecting = false
 
             if(intersects.length)
@@ -77,24 +94,15 @@ export class RayCursor
                 for(const intersect of intersects)
                 {
                     let isIntersecting = false
-                    let shapeIndex = 0
 
-                    // Test every shape for intersect
-                    while(!isIntersecting && shapeIndex <= intersect.shapes.length - 1)
-                    {
-                        const shape = intersect.shapes[shapeIndex]
-
-                        if(shape instanceof THREE.Sphere)
-                            isIntersecting = this.raycaster.ray.intersectsSphere(shape)
-                        if(shape instanceof THREE.Box3)
-                            isIntersecting = this.raycaster.ray.intersectsBox(shape)
-                        if(shape instanceof THREE.Plane)
-                            isIntersecting = this.raycaster.ray.intersectsPlane(shape)
-                        if(shape instanceof THREE.Mesh)
-                            isIntersecting = this.raycaster.intersectObject(shape).length
-                        
-                        shapeIndex++
-                    }
+                    if(intersect.shape instanceof THREE.Sphere)
+                        isIntersecting = this.raycaster.ray.intersectsSphere(intersect.shape)
+                    if(intersect.shape instanceof THREE.Box3)
+                        isIntersecting = this.raycaster.ray.intersectsBox(intersect.shape)
+                    if(intersect.shape instanceof THREE.Plane)
+                        isIntersecting = this.raycaster.ray.intersectsPlane(intersect.shape)
+                    if(intersect.shape instanceof THREE.Mesh)
+                        isIntersecting = this.raycaster.intersectObject(intersect.shape).length
 
                     // Intersect status changed
                     if(isIntersecting !== intersect.isIntersecting)
