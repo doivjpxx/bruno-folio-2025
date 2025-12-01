@@ -57,18 +57,26 @@ export class Explosions
                     if(finalStrength > bulletTimeStrengthThreshold)
                     {
                         game.time.bulletTime.activate()
+
+                        return true
                     }
                 }
             }
+
+            return false
         }
 
+        let vehicleHit = false
         if(vehicleOnly)
-            applyPhysicsExplosion(this.game.physicalVehicle.chassis.physical)
+            vehicleHit = applyPhysicsExplosion(this.game.physicalVehicle.chassis.physical)
         else
             this.game.objects.list.forEach((object) =>
             {
                 if(object.physical && object.physical.type === 'dynamic' && object.physical.body.isEnabled())
-                    applyPhysicsExplosion(object.physical)
+                    vehicleHit = vehicleHit | applyPhysicsExplosion(object.physical)
             })
+        // console.log('vehicleHit', vehicleHit)
+
+        return vehicleHit
     }
 }

@@ -159,8 +159,14 @@ export default
     ],
     [
         'sacrifice',
-        'Cut my life into pieces',
+        'One for the god of Chaos',
         'Sacrifice yourself into the altar.',
+        1
+    ],
+    [
+        'lightning',
+        '1.21 Gigawatts!',
+        'Get hit by a lightning.',
         1
     ],
     [

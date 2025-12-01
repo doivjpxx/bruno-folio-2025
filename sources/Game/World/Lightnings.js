@@ -35,6 +35,7 @@ export class Lightnings
             { label: 'hitChances', min: 0, max: 1, step: 0.001 },
             () =>
             {
+                return 1
                 return Math.max(0, this.game.weather.clouds.value) * Math.max(0, this.game.weather.electricField.value) * this.game.weather.humidity.value
             }
         )
@@ -421,7 +422,10 @@ export class Lightnings
             this.sounds.near[Math.floor(Math.random() * this.sounds.near.length)].play(coordinates)
 
             // Game explosion
-            this.game.explosions.explode(coordinates, 7, 4, true)
+            const vehicleHit = this.game.explosions.explode(coordinates, 7, 4, true)
+
+            if(vehicleHit)
+                this.game.achievements.setProgress('lightning', 1)
             
             // Arc
             disposables.push(this.arc.create(coordinates, rng))
