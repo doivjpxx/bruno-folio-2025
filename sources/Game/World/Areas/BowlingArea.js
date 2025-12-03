@@ -426,7 +426,8 @@ export class BowlingArea extends Area
 
         const outputNode = Fn(() =>
         {
-            const noteMask = texture(this.game.resources.jukeboxMusicNotes).r
+            const baseUv = vec2(uv().x, uv().y.oneMinus())
+            const noteMask = texture(this.game.resources.jukeboxMusicNotes, baseUv).r
             return vec4(notesColor.mul(notesStrength), noteMask)
         })()
 
