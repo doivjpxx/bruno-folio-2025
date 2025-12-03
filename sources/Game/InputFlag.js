@@ -44,10 +44,19 @@ export class InputFlag
             this.close()
         })
 
-        // Country code from localstorage
-        const countryCode = localStorage.getItem('countryCode') ?? ''
+        // Country code
+        let countryCode = ''
 
-        if(countryCode)
+        const localCountryCode = localStorage.getItem('countryCode')
+        if(localCountryCode)
+            countryCode = localCountryCode
+
+        if(countryCode === '')
+        {
+            countryCode = Intl.DateTimeFormat().resolvedOptions().locale?.split('-')[1].toLowerCase()
+        }
+
+        if(countryCode !== '')
         {
             this.country = this.countries.get(countryCode) ?? null
 
