@@ -185,7 +185,7 @@ export class Game
         this.world.init(1)
 
         // Pre-render if quality high
-        if(this.quality.level === 0)
+        if(this.quality.level === 0 && this.rendering.renderer.backend.isWebGPUBackend)
             PreRenderer.render()
 
         this.ticker.wait(3, () =>
