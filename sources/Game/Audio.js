@@ -149,15 +149,15 @@ export class Audio
         this.playlist = {}
         this.playlist.songs = [
             {
-                path: 'sounds/musics/Portfolio BS - Track 2 V1.mp3',
+                path: 'sounds/musics/Sudo.mp3',
                 name: 'Sudo.mp3'
             },
             {
-                path: 'sounds/musics/Portfolio BS - Track 4 V1.mp3',
+                path: 'sounds/musics/Boy.mp3',
                 name: 'Boy.mp3'
             },
             {
-                path: 'sounds/musics/Portfolio BS - Track 5_001 VF.mp3',
+                path: 'sounds/musics/Baguira.mp3',
                 name: 'Baguira.mp3'
             },
         ]
