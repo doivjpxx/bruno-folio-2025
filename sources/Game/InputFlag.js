@@ -53,7 +53,17 @@ export class InputFlag
 
         if(countryCode === '')
         {
-            countryCode = Intl.DateTimeFormat().resolvedOptions().locale?.split('-')[1].toLowerCase()
+            const locale = Intl.DateTimeFormat().resolvedOptions().locale
+            
+            if(locale)
+            {
+                const localeSplit = locale.split('-')
+
+                if(localeSplit.length)
+                {
+                    countryCode = localeSplit[localeSplit.length - 1]
+                }
+            }
         }
 
         if(countryCode !== '')
