@@ -121,9 +121,13 @@ export class Map
     {
         const element = this.game.domElement.querySelector('.js-map-trigger')
         
-        element.addEventListener('click', () =>
+        element.addEventListener('click', (event) =>
         {
             this.game.modals.open('map')
+        })
+        element.addEventListener('keydown', (event) =>
+        {
+            event.preventDefault()
         })
     }
 

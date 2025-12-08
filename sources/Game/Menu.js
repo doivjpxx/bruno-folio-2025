@@ -52,9 +52,9 @@ export class Menu
 
     setTrigger()
     {
-        const triggerElement = document.querySelector('.js-menu-trigger')
+        const element = document.querySelector('.js-menu-trigger')
 
-        triggerElement.addEventListener('click', (event) =>
+        element.addEventListener('click', (event) =>
         {
             event.preventDefault()
 
@@ -62,6 +62,10 @@ export class Menu
                 this.open('circuit')
             else
                 this.open()
+        })
+        element.addEventListener('keydown', (event) =>
+        {
+            event.preventDefault()
         })
     }
 
