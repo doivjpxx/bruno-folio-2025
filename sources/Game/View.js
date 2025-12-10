@@ -31,7 +31,7 @@ export class View
         {
             this.debugPanel = this.game.debug.panel.addFolder({
                 title: '🎥 View',
-                expanded: true,
+                expanded: false,
             })
 
             this.debugPanel.addBinding(
